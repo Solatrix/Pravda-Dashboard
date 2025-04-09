@@ -1,0 +1,94 @@
+.nums {
+    color: inherit /* Inherited color */
+}
+
+.nums::before {
+    content: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2210%22%20height%3D%2210%22%20viewBox%3D%220%200%2010%2010%22%3E%3Ccircle%20cx%3D%225%22%20cy%3D%225%22%20r%3D%225%22%20fill%3D%22%23currentColor%22%2F%3E%3C%2Fsvg%3E");
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    margin-right: 5px;
+}
+.textline{
+	stroke-width:.6px !important;
+}
+.graph-container-small g.hoverlayer > g.hovertext,
+.graph-container-small g.hoverlayer > g.axistext,
+.graph-container g.hoverlayer > g.hovertext,
+.graph-container g.hoverlayer > g.axistext{
+	animation: show 250ms forwards;
+	opacity:0;
+}
+
+
+.graph-container-small g.hoverlayer path, .graph-container g.hoverlayer path{
+	transform:scale(1.2);
+}
+.graph-container-small g.hoverlayer path, .graph-container g.hoverlayer path {
+	fill:hsl(132, 100%, 99%) !important;
+	stroke:rgba(0, 0, 0, 0.4) !important;
+	stroke-width: .2px !important;
+	filter: drop-shadow( 0 5px 10px rgba(0, 0, 0, .12));
+	
+}
+
+
+.graph-container-small g.hoverlayer text, .graph-container g.hoverlayer text {
+	font-family: "Instrument Sans", "Helvetica", sans-serif !important;
+	fill: #282f2e !important;
+	font-size:.8rem !important;
+  
+}
+.graph-container-small g.hoverlayer text tspan:first-child, 
+.graph-container g.hoverlayer text tspan:first-child{
+	font-weight: 600;
+
+}
+
+.graph-container-small g.hoverlayer  .hovertext text[x],
+.graph-container g.hoverlayer  .hovertext text[x] {
+
+	--x-adjustment: .325rem;
+	transform: translateX(var(--x-adjustment));
+  }
+  
+.graph-container-small g.hoverlayer  .hovertext text[x^="-"],
+.graph-container g.hoverlayer  .hovertext text[x^="-"] {
+	--x-adjustment: -.3rem;
+	transform: translateX(var(--x-adjustment));
+}
+
+.graph-container-small g.hoverlayer  .hovertext text[x],
+.graph-container g.hovertext text .line:first-child, .legendtext{
+	text-transform: capitalize !important;
+	
+}
+.graph-container-small g.hoverlayer .axistext path,
+.graph-container g.hoverlayer .axistext path{
+	transform:scale(1.2) translateY(-.175rem);
+
+
+}
+.graph-container-small g.hoverlayer .axistext text,
+.graph-container g.hoverlayer .axistext text {
+    font-family: "Instrument Sans", "Helvetica", sans-serif !important;
+    fill: #282f2e !important;
+
+}
+
+.graph-container-small g.hoverlayer .axistext text,
+.graph-container g.hoverlayer .axistext text {
+    font-family: "Instrument Sans", "Helvetica", sans-serif !important;
+    fill: #282f2e !important;
+    font-size:.8rem !important;
+    transform: none !important; /* Remove any existing transforms */
+    alignment-baseline: middle !important; /* Attempt vertical centering */
+    dominant-baseline: middle !important; /* Attempt another method of vertical centering */
+    line-height: 1 !important; /* Reset line height to ensure consistent behavior */
+}
+
+@keyframes show {
+	100% {
+		opacity: 1;
+	}
+}
