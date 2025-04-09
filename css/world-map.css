@@ -1,6 +1,6 @@
 
-@import url("./plotly-graphs.css");
-@import url("./merge.css");
+@import url("./css/plotly-graphs.css");
+@import url("./css/merge.css");
 
 body{
     background-color: transparent !important;
