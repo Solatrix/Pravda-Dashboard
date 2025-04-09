@@ -28,6 +28,7 @@ body{
     overflow: hidden;
     position: relative;
 }
+
 div#background-map{
     width:inherit;
     height:inherit;
@@ -36,7 +37,6 @@ div#background-map{
     left: 0;
     bottom: 0;
     border-radius:15px;
-    /* -webkit-mask-image: -webkit-gradient(linear, left 80%, left top, from(rgba(0, 0, 0, 1)), to(rgba(0, 0, 0, .4))); */
 }
 
 .map section, .map div{
@@ -128,13 +128,22 @@ dialog#feature-view{
     width: 80vw;
     height: 60vh;
     padding: 30px;
-    .header{
+    .container{
+        display: flex;
+        flex-flow: column;
+        gap: 1.5rem;
+        text-align: center;
+    }
+    .headline{
         display: flex;
         flex-flow: row;
         align-items: center;
         justify-content: space-between;
         margin: 15px 0px;
-
+        margin-bottom: 20px;
+        border-bottom: 1px solid rgba(0, 0, 0, .08);
+        padding-bottom: 20px;
+    }
         h3{
             margin: 0px;
         }
@@ -142,13 +151,17 @@ dialog#feature-view{
         .domain{
             font-size: 12px;
             background-color: #3ED7A4;
-            padding: 5px;
-            border-radius: 13px;
+            padding: 7px;
+            line-height: 12px;
+            border-radius: 20px;
             color: white;
             border: 1px solid rgba(255, 255, 255, .3);
+            outline: none;
+            text-decoration: none;
+            cursor:pointer;
         }
-    }
 }
+
 dialog#feature-view .close-button{
     position: absolute;
     top: 15px;
@@ -196,4 +209,8 @@ dialog#feature-view .close-button{
     justify-content: space-around;
     --primary: #a9a9a9;
     --secondary: #3ED7A4;
+}
+dialog{
+    animation: show 750ms forwards;
+	opacity:0;
 }

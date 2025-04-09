@@ -1,4 +1,4 @@
-import { complementaryScale, colorScale, defaultLayout } from "./constants.js";
+import { complementaryScale, colorScale, defaultLayout, random } from "./constants.js";
 
 export const renderHourlyGraph = async (remoteData, target) => {
 	const data = await remoteData;
@@ -28,7 +28,7 @@ export const renderHourlyGraph = async (remoteData, target) => {
 
 	};
 
-	Plotly.newPlot(target, [trace], layout, { responsive: true });
+	Plotly.newPlot(target, [trace], layout, { responsive: true, displayModeBar: false });
 }
 
 export const renderPostingFrequencyChart = async (remoteData, target) => {
@@ -58,7 +58,7 @@ export const renderPostingFrequencyChart = async (remoteData, target) => {
 
 	};
 
-	Plotly.newPlot(target, [trace], layout, { responsive: true });
+	Plotly.newPlot(target, [trace], layout, { responsive: true, displayModeBar: false });
 }
 
 export const renderTopSourcesChart =  async (remoteData, target) => {
@@ -102,7 +102,7 @@ export const renderTopSourcesChart =  async (remoteData, target) => {
 
 	};
 
-	Plotly.newPlot(target, [trace], layout, { responsive: true });
+	Plotly.newPlot(target, [trace], layout, { responsive: true, displayModeBar: false });
 }
 
 export const renderCategories = async (remoteData, target) => {
@@ -129,5 +129,48 @@ export const renderCategories = async (remoteData, target) => {
 		...defaultLayout
 	};
 
-	Plotly.newPlot(target, [trace], layout, { responsive: true });
+	Plotly.newPlot(target, [trace], layout, { responsive: true, displayModeBar: false });
+}
+
+export const renderSourcesByDay = async (remoteData, target) => {
+	const data = await remoteData.sourcesByDay;
+	const traceData = [];
+
+	let sources = Object.keys(data[0]).filter(key => key !== 'date');
+
+	sources.forEach(source => {
+		const color = complementaryScale[random(0,4)]
+		const trace = {
+			x: data.map(item => item.date),
+			y: data.map(item => item[source]),
+			type: 'scatter',
+			line: {
+				color: color,
+				width: 1.2,
+			},
+			hovertemplate: `${source}<br>%{y} articles<br>%{x}<extra></extra>`,
+			name: source
+		};
+		traceData.push(trace);
+	});
+
+	const layout = {
+		xaxis: {
+			type: 'category',
+			tickangle: -45,
+		},
+		yaxis: {
+			title: 'Articles'
+		},
+		hovermode:"closest",
+		legend: {
+			x: 1,
+			y: 1
+		},
+		...defaultLayout
+	};
+	Plotly.newPlot(target, traceData, layout, {
+		responsive: true,
+		displayModeBar: false
+	});
 }

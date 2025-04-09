@@ -20,11 +20,13 @@ export const modalBox = async (feature, domains, world) => {
     dialog.innerHTML = template;
     dialog.showModal();
 
-    const resetView = () => {
-        dialog.close()
-        console.log(dialog)
-        document.querySelector(".title h3").innerHTML = ""
+    const resetView = () => dialog.close()
+
+    const openNewTab = (e) => {
+        e.preventDefault();
+        window.open(e.target.href, '_blank').focus();
     }
+    
     document.querySelector(".close-button").addEventListener("click", resetView)
     const elements = document.querySelector('dialog .container');
     elements.classList.add("hidden")
@@ -36,7 +38,6 @@ export const modalBox = async (feature, domains, world) => {
     renderCategories(data, "category-chart")
     elements.classList.remove("hidden")
     document.querySelector("dialog#feature-view .loader_container").classList.add("hidden")
-
-
-   
+    
+    document.querySelector("a.domain").addEventListener("click", openNewTab)
 }
