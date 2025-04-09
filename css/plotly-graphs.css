@@ -86,7 +86,10 @@
     dominant-baseline: middle !important; /* Attempt another method of vertical centering */
     line-height: 1 !important; /* Reset line height to ensure consistent behavior */
 }
-
+.js-plotly-plot{
+	margin-top:-55px;
+	margin-bottom: 20px;
+}
 @keyframes show {
 	100% {
 		opacity: 1;

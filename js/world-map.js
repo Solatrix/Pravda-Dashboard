@@ -38,9 +38,9 @@ import { modalBox } from "./modalBox.js";
 				tooltip.classList.remove("hidden")
 				tooltip.style.left = e.originalEvent.pageX + 'px';
 				tooltip.style.top = e.originalEvent.pageY + 'px';
-				tooltip.innerHTML = `\
-					${feature.properties.ADMIN}<br> \
-					${data[feature.properties.ADMIN] ? localeNb.format(data[feature.properties.ADMIN].totalArticles) : "N/A"}\
+				tooltip.innerHTML = `
+					${feature.properties.ADMIN}<br>
+					${data[feature.properties.ADMIN] ? "Articles: "+localeNb.format(data[feature.properties.ADMIN].totalArticles) : "N/A"}
 				`
 			}
 			const disableTooltip = (e) => document.querySelector(".tooltip").classList.add("hidden")
@@ -49,7 +49,6 @@ import { modalBox } from "./modalBox.js";
 				if (!data[feature.properties.ADMIN]) return
 				map.setView(e.latlng, 6)
 				map.fitBounds(e.target._bounds)
-				document.querySelector("section.title > h3").innerText = feature.properties.ADMIN
 				modalBox(feature.properties.ADMIN, domains, data)
 			}
 			layer.on({
@@ -171,7 +170,6 @@ import { modalBox } from "./modalBox.js";
 				map.fitBounds(L.geoJSON(polygon).getBounds())
 			}
 			modalBox(feature, domains, world)
-			document.querySelector(".title h3").innerHTML = feature
 				updateResultsUI([])
 				input.value = ""
 		}

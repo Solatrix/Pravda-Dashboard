@@ -22,29 +22,40 @@ export const localeNb = new Intl.NumberFormat('en-GB', {
 
 export const popupHTML = ` 
 	<div class="overlay-popup">
-	<div class="close-button">x</div>
-	<div class="header">
+	<div class="close-button">🗙</div>
+	<div class="headline">
 		<h3>{{feature}}</h3>
-		<div class="domain">
-			{{domain}}
+		<div>
+			<a 
+			alt="View more details"
+			class="domain" 
+			href="/details.html?view={{feature}}">
+				{{domain}}
+			</a>
 		</div>
 	</div>
 	<div class="container graph-container-small" data-feature-name="{{feature}}">
+		<article>
+			<div class="header">Most frequent sources</div>
+			<div id="top-sources-chart"></div>
+		</article>
 
-		<div class="header">Most frequent sources</div>
-		<div id="top-sources-chart"></div>
-
-		<div class="header">
-			Posting frequency over time
-		</div>
-		<div id="frequency-chart">
-		</div>
+		<article>
+			<div class="header">
+				Posting frequency over time
+			</div>
+			<div id="frequency-chart">
+			</div>
+		</article>
 	
-		<div class="header">Publications per hour</div>
-		<div id="hourly-chart"></div>
-
-		<div class="header">Categories</div>
-		<div id="category-chart"></div>
+		<article>
+			<div class="header">Publications per hour</div>
+			<div id="hourly-chart"></div>
+		</article>
+		<article>
+			<div class="header">Categories</div>
+			<div id="category-chart"></div>
+		</article>
 	</div>
 		<div class="loader_container">
 			<div class="merge"></div>

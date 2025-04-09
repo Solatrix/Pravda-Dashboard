@@ -1,373 +1,372 @@
 {
-    "domains": [
-    "canada.news-pravda.com",
-    "en-jp.news-pravda.com",
-    "spanish.news-pravda.com",
-    "ireland.news-pravda.com",
-    "spain.news-pravda.com",
-    "france.news-pravda.com",
-    "sudan.news-pravda.com",
-    "luxembourg.news-pravda.com",
-    "portuguese.news-pravda.com",
-    "singapore.news-pravda.com",
-    "catalan.news-pravda.com",
-    "germany.news-pravda.com",
-    "news-pravda.com",
-    "iceland.news-pravda.com",
-    "montenegro.news-pravda.com",
-    "en-hu.news-pravda.com",
-    "nato.news-pravda.com",
-    "mali.news-pravda.com",
-    "dprk.news-pravda.com",
-    "nigeria.news-pravda.com",
-    "korea.news-pravda.com",
-    "denmark.news-pravda.com",
-    "egypt.news-pravda.com",
-    "norway.news-pravda.com",
-    "algeria.news-pravda.com",
-    "eu.news-pravda.com",
-    "moldova.news-pravda.com",
-    "netherlands.news-pravda.com",
-    "ossetia.news-pravda.com",
-    "gambia.news-pravda.com",
-    "chad.news-pravda.com",
-    "trump.news-pravda.com",
-    "turkey.news-pravda.com",
-    "scholz.news-pravda.com",
-    "francais.news-pravda.com",
-    "eritrea.news-pravda.com",
-    "car.news-pravda.com",
-    "belgique.news-pravda.com",
-    "bosnia-herzegovina.news-pravda.com",
-    "italy.news-pravda.com",
-    "macron.news-pravda.com",
-    "galician.news-pravda.com",
-    "senegal.news-pravda.com",
-    "maori.news-pravda.com",
-    "en-ro.news-pravda.com",
-    "serbia.news-pravda.com",
-    "burkina-faso.news-pravda.com",
-    "ro-ro.news-pravda.com",
-    "sweden.news-pravda.com",
-    "suisse.news-pravda.com",
-    "cyprus.news-pravda.com",
-    "scotland.news-pravda.com",
-    "dutch.news-pravda.com",
-    "australia.news-pravda.com",
-    "balkan.news-pravda.com",
-    "hu-hu.news-pravda.com",
-    "armenia.news-pravda.com",
-    "north-macedonia.news-pravda.com",
-    "ja-jp.news-pravda.com",
-    "south-sudan.news-pravda.com",
-    "slovenia.news-pravda.com",
-    "south-korea.news-pravda.com",
-    "switzerland.news-pravda.com",
-    "poland.news-pravda.com",
-    "taiwan.news-pravda.com",
-    "greece.news-pravda.com",
-    "niger.news-pravda.com",
-    "syria.news-pravda.com",
-    "wales.news-pravda.com",
-    "japan.news-pravda.com",
-    "rca.news-pravda.com",
-    "romania.news-pravda.com",
-    "finland.news-pravda.com",
-    "uk.news-pravda.com",
-    "ukraine.news-pravda.com",
-    "slovakia.news-pravda.com",
-    "mauritania.news-pravda.com",
-    "albania.news-pravda.com",
-    "croatia.news-pravda.com",
-    "guinea.news-pravda.com",
-    "bulgaria.news-pravda.com",
-    "new-zealand.news-pravda.com",
-    "ge.news-pravda.com",
-    "latvia.news-pravda.com",
-    "austria.news-pravda.com",
-    "estonia.news-pravda.com",
-    "belgium.news-pravda.com",
-    "lithuania.news-pravda.com",
-    "czechia.news-pravda.com",
-    "deutsch.news-pravda.com",
-    "portugal.news-pravda.com",
-    "usa.news-pravda.com",
-    "basque.news-pravda.com",
-    "hungary.news-pravda.com",
-    "abkhazia.news-pravda.com"
-  ],
-  "Regions": {
-    "GE/Abkhazia": [
-        "abkhazia.news-pravda.com"
-    ],
-    "Albania": [
-        "albania.news-pravda.com"
-    ],
-    "Algeria": [
-        "algeria.news-pravda.com"
-    ],
-    "All": [
-        "news-pravda.com"
-    ],
-    "Armenia": [
-        "armenia.news-pravda.com",
-        "news-armenia.com"
-    ],
-    "Australia": [
-        "australia.news-pravda.com"
-    ],
-    "Austria": [
-        "austria.news-pravda.com"
-    ],
-    "Region/Balkans": [
-        "balkan.news-pravda.com"
-    ],
-    "ES/Basque Country": [
-        "basque.news-pravda.com"
-    ],
-    "Belgium": [
-        "belgique.news-pravda.com",
-        "belgium.news-pravda.com"
-    ],
-    "Bosnia and Herzegovina": [
-        "bosnia-herzegovina.news-pravda.com"
-    ],
-    "Bulgaria": [
-        "bulgaria.news-pravda.com"
-    ],
-    "Burkina Faso": [
-        "burkina-faso.news-pravda.com"
-    ],
-    "Cameroon": [
-        "cameroon.news-pravda.com"
-    ],
-    "Canada": [
-        "canada.news-pravda.com"
-    ],
-    "ES/Catalonia": [
-        "catalan.news-pravda.com"
-    ],
-    "Central African Republic": [
-        "car.news-pravda.com",
-        "rca.news-pravda.com"
-    ],
-    "Chad": [
-        "chad.news-pravda.com"
-    ],
-    "Croatia": [
-        "croatia.news-pravda.com"
-    ],
-    "Cyprus": [
-        "cyprus.news-pravda.com"
-    ],
-    "Czech Republic": [
-        "czechia.news-pravda.com"
-    ],
-    "Denmark": [
-        "denmark.news-pravda.com"
-    ],
-    "Democratic People's Republic of Korea": [
-        "dprk.news-pravda.com"
-    ],
-    "EU": [
-        "eu.news-pravda.com"
-    ],
-    "Egypt": [
-        "egypt.news-pravda.com"
-    ],
-    "Equatorial Guinea": [
-        "guinea.news-pravda.com"
-    ],
-    "Eritrea": [
-        "eritrea.news-pravda.com"
-    ],
-    "Estonia": [
-        "estonia.news-pravda.com",
-        "news-estonia.com"
-    ],
-    "Finland": [
-        "finland.news-pravda.com"
-    ],
-    "France": [
-        "francais.news-pravda.com",
-        "france.news-pravda.com"
-    ],
-    "ES/Galicia": [
-        "galician.news-pravda.com"
-    ],
-    "Gambia": [
-        "gambia.news-pravda.com"
-    ],
-    "Georgia": [
-        "georgia.news-pravda.com",
-        "georgia-news.com",
-        "ge.news-pravda.com"
-    ],
- 
-    "Germany": [
-        "germany.news-pravda.com",
-        "deutsch.news-pravda.com"
-    ],
-    "Greece": [
-        "greece.news-pravda.com"
-    ],
-    "Guinea-Bissau": [
-        "guinea-bissau.news-pravda.com"
-    ],
-    "Hungary": [
-        "hungary.news-pravda.com",
-        "en-hu.news-pravda.com",
-        "hu-hu.news-pravda.com"
-    ],
-    "Iceland": [
-        "iceland.news-pravda.com"
-    ],
-    "Ireland": [
-        "ireland.news-pravda.com",
-        "irish.news-pravda.com"
-    ],
-    "Italy": [
-        "italy.news-pravda.com"
-    ],
-    "Japan": [
-        "japan.news-pravda.com",
-        "en-jp.news-pravda.com",
-        "ja-jp.news-pravda.com"
-    ],
-    "Korea": [
-        "korea.news-pravda.com",
-        "south-korea.news-pravda.com"
-    ],
-    "Latvia": [
-        "latvia.news-pravda.com",
-        "latvia-news.com"
-    ],
-    "Lithuania": [
-        "lithuania.news-pravda.com",
-        "lithuania-news.com"
-    ],
-    "Luxemburg": [
-        "luxembourg.news-pravda.com"
-    ],
-    "Macron": [
-        "macron.news-pravda.com"
-    ],
-    "Mali": [
-        "mali.news-pravda.com"
-    ],
-    "Malta": [
-        "malta.news-pravda.com"
-    ],
-    "Mauritania": [
-        "mauritania.news-pravda.com"
-    ],
-    "Moldova": [
-        "moldova.news-pravda.com",
-        "moldova-news.com"
-    ],
-    "Montenegro": [
-        "montenegro.news-pravda.com"
-    ],
-    "NATO": [
-        "nato.news-pravda.com"
-    ],
-    "Netherlands": [
-        "dutch.news-pravda.com",
-        "netherlands.news-pravda.com"
-    ],
-    "New Zealand": [
-        "new-zealand.news-pravda.com",
-        "maori.news-pravda.com"
-    ],
-    "Niger": [
-        "niger.news-pravda.com"
-    ],
-    "Nigeria": [
-        "nigeria.news-pravda.com"
-    ],
-    "North-Macedonia": [
-        "north-macedonia.news-pravda.com"
-    ],
-    "Norway": [
-        "norway.news-pravda.com"
-    ],
-    "Poland": [
-        "poland.news-pravda.com"
-    ],
-    "Portugal": [
-        "portugal.news-pravda.com",
-        "portuguese.news-pravda.com"
-    ],
-    "Republika Srpska": [
-        "srpska.news-pravda.com"
-    ],
-    "Romania": [
-        "romania.news-pravda.com",
-        "en-ro.news-pravda.com",
-        "ro-ro.news-pravda.com"
-    ],
-    "UK/Scotland": [
-        "scotland.news-pravda.com"
-    ],
-    "Senegal": [
-        "senegal.news-pravda.com"
-    ],
-    "Serbia": [
-        "serbia.news-pravda.com"
-    ],
-    "Singapore": [
-        "singapore.news-pravda.com"
-    ],
-    "Slovakia": [
-        "slovakia.news-pravda.com"
-    ],
-    "Slovenia": [
-        "slovenia.news-pravda.com"
-    ],
-    "GE/South-Ossetia": [
-        "ossetia.news-pravda.com"
-    ],
-    "South-Sudan": [
-        "south-sudan.news-pravda.com"
-    ],
-    "Spain": [
-        "spain.news-pravda.com",
-        "spanish.news-pravda.com"
-    ],
-    "Sudan": [
-        "sudan.news-pravda.com"
-    ],
-    "Sweden": [
-        "sweden.news-pravda.com"
-    ],
-    "Switzerland": [
-        "suisse.news-pravda.com",
-        "switzerland.news-pravda.com"
-    ],
-    "Syria": [
-        "syria.news-pravda.com"
-    ],
-    "Taiwan": [
-        "taiwan.news-pravda.com"
-    ],
-    "Trump": [
-        "trump.news-pravda.com"
-    ],
-    "Turkey": [
-        "turkey.news-pravda.com"
-    ],
-    "Ukraine": [
-        "ukraine.news-pravda.com",
-        "ua.news-pravda.com"
-    ],
-    "United Kingdom": [
-        "uk.news-pravda.com"
-    ],
-    "United States of America": [
-        "usa.news-pravda.com"
-    ],
-    "UK/Wales": [
-        "wales.news-pravda.com"
-    ]
-}
+	"domains": [
+		"canada.news-pravda.com",
+		"en-jp.news-pravda.com",
+		"spanish.news-pravda.com",
+		"ireland.news-pravda.com",
+		"spain.news-pravda.com",
+		"france.news-pravda.com",
+		"sudan.news-pravda.com",
+		"luxembourg.news-pravda.com",
+		"portuguese.news-pravda.com",
+		"singapore.news-pravda.com",
+		"catalan.news-pravda.com",
+		"germany.news-pravda.com",
+		"news-pravda.com",
+		"iceland.news-pravda.com",
+		"montenegro.news-pravda.com",
+		"en-hu.news-pravda.com",
+		"nato.news-pravda.com",
+		"mali.news-pravda.com",
+		"dprk.news-pravda.com",
+		"nigeria.news-pravda.com",
+		"korea.news-pravda.com",
+		"denmark.news-pravda.com",
+		"egypt.news-pravda.com",
+		"norway.news-pravda.com",
+		"algeria.news-pravda.com",
+		"eu.news-pravda.com",
+		"moldova.news-pravda.com",
+		"netherlands.news-pravda.com",
+		"ossetia.news-pravda.com",
+		"gambia.news-pravda.com",
+		"chad.news-pravda.com",
+		"trump.news-pravda.com",
+		"turkey.news-pravda.com",
+		"scholz.news-pravda.com",
+		"francais.news-pravda.com",
+		"eritrea.news-pravda.com",
+		"car.news-pravda.com",
+		"belgique.news-pravda.com",
+		"bosnia-herzegovina.news-pravda.com",
+		"italy.news-pravda.com",
+		"macron.news-pravda.com",
+		"galician.news-pravda.com",
+		"senegal.news-pravda.com",
+		"maori.news-pravda.com",
+		"en-ro.news-pravda.com",
+		"serbia.news-pravda.com",
+		"burkina-faso.news-pravda.com",
+		"ro-ro.news-pravda.com",
+		"sweden.news-pravda.com",
+		"suisse.news-pravda.com",
+		"cyprus.news-pravda.com",
+		"scotland.news-pravda.com",
+		"dutch.news-pravda.com",
+		"australia.news-pravda.com",
+		"balkan.news-pravda.com",
+		"hu-hu.news-pravda.com",
+		"armenia.news-pravda.com",
+		"north-macedonia.news-pravda.com",
+		"ja-jp.news-pravda.com",
+		"south-sudan.news-pravda.com",
+		"slovenia.news-pravda.com",
+		"south-korea.news-pravda.com",
+		"switzerland.news-pravda.com",
+		"poland.news-pravda.com",
+		"taiwan.news-pravda.com",
+		"greece.news-pravda.com",
+		"niger.news-pravda.com",
+		"syria.news-pravda.com",
+		"wales.news-pravda.com",
+		"japan.news-pravda.com",
+		"rca.news-pravda.com",
+		"romania.news-pravda.com",
+		"finland.news-pravda.com",
+		"uk.news-pravda.com",
+		"ukraine.news-pravda.com",
+		"slovakia.news-pravda.com",
+		"mauritania.news-pravda.com",
+		"albania.news-pravda.com",
+		"croatia.news-pravda.com",
+		"guinea.news-pravda.com",
+		"bulgaria.news-pravda.com",
+		"new-zealand.news-pravda.com",
+		"ge.news-pravda.com",
+		"latvia.news-pravda.com",
+		"austria.news-pravda.com",
+		"estonia.news-pravda.com",
+		"belgium.news-pravda.com",
+		"lithuania.news-pravda.com",
+		"czechia.news-pravda.com",
+		"deutsch.news-pravda.com",
+		"portugal.news-pravda.com",
+		"usa.news-pravda.com",
+		"basque.news-pravda.com",
+		"hungary.news-pravda.com",
+		"abkhazia.news-pravda.com"
+	],
+	"Regions": {
+		"GE/Abkhazia": [
+			"abkhazia.news-pravda.com"
+		],
+		"Albania": [
+			"albania.news-pravda.com"
+		],
+		"Algeria": [
+			"algeria.news-pravda.com"
+		],
+		"All": [
+			"news-pravda.com"
+		],
+		"Armenia": [
+			"armenia.news-pravda.com",
+			"news-armenia.com"
+		],
+		"Australia": [
+			"australia.news-pravda.com"
+		],
+		"Austria": [
+			"austria.news-pravda.com"
+		],
+		"Region/Balkans": [
+			"balkan.news-pravda.com"
+		],
+		"ES/Basque Country": [
+			"basque.news-pravda.com"
+		],
+		"Belgium": [
+			"belgique.news-pravda.com",
+			"belgium.news-pravda.com"
+		],
+		"Bosnia and Herzegovina": [
+			"bosnia-herzegovina.news-pravda.com"
+		],
+		"Bulgaria": [
+			"bulgaria.news-pravda.com"
+		],
+		"Burkina Faso": [
+			"burkina-faso.news-pravda.com"
+		],
+		"Cameroon": [
+			"cameroon.news-pravda.com"
+		],
+		"Canada": [
+			"canada.news-pravda.com"
+		],
+		"ES/Catalonia": [
+			"catalan.news-pravda.com"
+		],
+		"Central African Republic": [
+			"car.news-pravda.com",
+			"rca.news-pravda.com"
+		],
+		"Chad": [
+			"chad.news-pravda.com"
+		],
+		"Croatia": [
+			"croatia.news-pravda.com"
+		],
+		"Cyprus": [
+			"cyprus.news-pravda.com"
+		],
+		"Czech Republic": [
+			"czechia.news-pravda.com"
+		],
+		"Denmark": [
+			"denmark.news-pravda.com"
+		],
+		"Democratic People's Republic of Korea": [
+			"dprk.news-pravda.com"
+		],
+		"EU": [
+			"eu.news-pravda.com"
+		],
+		"Egypt": [
+			"egypt.news-pravda.com"
+		],
+		"Equatorial Guinea": [
+			"guinea.news-pravda.com"
+		],
+		"Eritrea": [
+			"eritrea.news-pravda.com"
+		],
+		"Estonia": [
+			"estonia.news-pravda.com",
+			"news-estonia.com"
+		],
+		"Finland": [
+			"finland.news-pravda.com"
+		],
+		"France": [
+			"francais.news-pravda.com",
+			"france.news-pravda.com"
+		],
+		"ES/Galicia": [
+			"galician.news-pravda.com"
+		],
+		"Gambia": [
+			"gambia.news-pravda.com"
+		],
+		"Georgia": [
+			"georgia.news-pravda.com",
+			"georgia-news.com",
+			"ge.news-pravda.com"
+		],
+		"Germany": [
+			"germany.news-pravda.com",
+			"deutsch.news-pravda.com"
+		],
+		"Greece": [
+			"greece.news-pravda.com"
+		],
+		"Guinea-Bissau": [
+			"guinea-bissau.news-pravda.com"
+		],
+		"Hungary": [
+			"hungary.news-pravda.com",
+			"en-hu.news-pravda.com",
+			"hu-hu.news-pravda.com"
+		],
+		"Iceland": [
+			"iceland.news-pravda.com"
+		],
+		"Ireland": [
+			"ireland.news-pravda.com",
+			"irish.news-pravda.com"
+		],
+		"Italy": [
+			"italy.news-pravda.com"
+		],
+		"Japan": [
+			"japan.news-pravda.com",
+			"en-jp.news-pravda.com",
+			"ja-jp.news-pravda.com"
+		],
+		"Korea": [
+			"korea.news-pravda.com",
+			"south-korea.news-pravda.com"
+		],
+		"Latvia": [
+			"latvia.news-pravda.com",
+			"latvia-news.com"
+		],
+		"Lithuania": [
+			"lithuania.news-pravda.com",
+			"lithuania-news.com"
+		],
+		"Luxemburg": [
+			"luxembourg.news-pravda.com"
+		],
+		"Macron": [
+			"macron.news-pravda.com"
+		],
+		"Mali": [
+			"mali.news-pravda.com"
+		],
+		"Malta": [
+			"malta.news-pravda.com"
+		],
+		"Mauritania": [
+			"mauritania.news-pravda.com"
+		],
+		"Moldova": [
+			"moldova.news-pravda.com",
+			"moldova-news.com"
+		],
+		"Montenegro": [
+			"montenegro.news-pravda.com"
+		],
+		"NATO": [
+			"nato.news-pravda.com"
+		],
+		"Netherlands": [
+			"dutch.news-pravda.com",
+			"netherlands.news-pravda.com"
+		],
+		"New Zealand": [
+			"new-zealand.news-pravda.com",
+			"maori.news-pravda.com"
+		],
+		"Niger": [
+			"niger.news-pravda.com"
+		],
+		"Nigeria": [
+			"nigeria.news-pravda.com"
+		],
+		"North-Macedonia": [
+			"north-macedonia.news-pravda.com"
+		],
+		"Norway": [
+			"norway.news-pravda.com"
+		],
+		"Poland": [
+			"poland.news-pravda.com"
+		],
+		"Portugal": [
+			"portugal.news-pravda.com",
+			"portuguese.news-pravda.com"
+		],
+		"Republika Srpska": [
+			"srpska.news-pravda.com"
+		],
+		"Romania": [
+			"romania.news-pravda.com",
+			"en-ro.news-pravda.com",
+			"ro-ro.news-pravda.com"
+		],
+		"UK/Scotland": [
+			"scotland.news-pravda.com"
+		],
+		"Senegal": [
+			"senegal.news-pravda.com"
+		],
+		"Serbia": [
+			"serbia.news-pravda.com"
+		],
+		"Singapore": [
+			"singapore.news-pravda.com"
+		],
+		"Slovakia": [
+			"slovakia.news-pravda.com"
+		],
+		"Slovenia": [
+			"slovenia.news-pravda.com"
+		],
+		"GE/South-Ossetia": [
+			"ossetia.news-pravda.com"
+		],
+		"South-Sudan": [
+			"south-sudan.news-pravda.com"
+		],
+		"Spain": [
+			"spain.news-pravda.com",
+			"spanish.news-pravda.com"
+		],
+		"Sudan": [
+			"sudan.news-pravda.com"
+		],
+		"Sweden": [
+			"sweden.news-pravda.com"
+		],
+		"Switzerland": [
+			"suisse.news-pravda.com",
+			"switzerland.news-pravda.com"
+		],
+		"Syria": [
+			"syria.news-pravda.com"
+		],
+		"Taiwan": [
+			"taiwan.news-pravda.com"
+		],
+		"Trump": [
+			"trump.news-pravda.com"
+		],
+		"Turkey": [
+			"turkey.news-pravda.com"
+		],
+		"Ukraine": [
+			"ukraine.news-pravda.com",
+			"ua.news-pravda.com"
+		],
+		"United Kingdom": [
+			"uk.news-pravda.com"
+		],
+		"United States of America": [
+			"usa.news-pravda.com"
+		],
+		"UK/Wales": [
+			"wales.news-pravda.com"
+		]
+	}
 }
