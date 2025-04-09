@@ -29,6 +29,20 @@ body{
     position: relative;
 }
 
+#logo svg {
+	width: 200px;
+
+}
+
+#logo {
+	display: flex;
+	flex-flow: row;
+    position: absolute;
+    top: -6px;
+    left: 65px;
+    z-index: 999;
+    width: 150px;
+}
 div#background-map{
     width:inherit;
     height:inherit;
@@ -150,16 +164,24 @@ dialog#feature-view{
 
         .domain{
             font-size: 12px;
-            background-color: #3ED7A4;
             padding: 7px;
             line-height: 12px;
             border-radius: 20px;
-            color: white;
-            border: 1px solid rgba(255, 255, 255, .3);
+            color: black;
+            cursor: pointer;
+            font-weight: normal;
             outline: none;
             text-decoration: none;
-            cursor:pointer;
+            &:before{
+                content:"Learn more: 🔗";
+            }
+            &:hover{
+                color:#525252;
+                text-decoration: underline;
+                animation: color .2s ease-in;
+            }
         }
+        
 }
 
 dialog#feature-view .close-button{
