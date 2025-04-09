@@ -4,7 +4,7 @@
 
 The Pravda Dashboard World Map is a collaborative effort between [@DFRLab](https://www.dfrlab.org) and [@CheckFirstHQ](https://www.checkfirst.network), aimed at reverse-engineering and visualizing the Pravda Network—a well-established Russian disinformation network initially reported by Viginum.
 
-Explore the near real-time updated dataset published by CheckFirst in their (repository)[https://github.com/CheckFirstHQ/pravda-network].
+Explore the near real-time updated dataset published by CheckFirst in their [repository](https://github.com/CheckFirstHQ/pravda-network).
 
 ## The Pravda Network World Map
 
