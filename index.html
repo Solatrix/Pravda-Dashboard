@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Document</title>
+</head>
+<body>
+	<div id="background-map"></div>
+	<div class="tooltip hidden"></div>
+	<div class="loader_container">
+		<div class="merge"></div>
+	</div>
+	<section class="map">
+		<section class="title">
+			<h3></h3>
+		</section>
+		<section class="search-bar">
+			<input type="text" class="type" placeholder="Look up a country or a region" id="search-input"/>
+		</section>
+		<section class="side-bar hidden">
+		</section>
+	</section>
+
+	<!-- Fonts -->
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link
+		href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap"
+		rel="stylesheet">
+	
+	<!-- Stylesheets -->
+	<link rel="stylesheet" href="css/world-map.css">
+	<!-- Leaflet JS -->
+	<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+
+	<!-- Plotly.js -->
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+	<!-- D3.js -->
+	<script src="https://unpkg.com/d3@5.7.0/dist/d3.min.js"></script>
+	<script src="js/world-map.js" type="module"></script>
+
+</body>
+</html>
