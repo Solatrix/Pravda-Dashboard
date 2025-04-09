@@ -29,7 +29,7 @@ export const popupHTML = `
 			<a 
 			alt="View more details"
 			class="domain" 
-			href="/details.html?view={{feature}}">
+			href="./details.html?view={{feature}}">
 				{{domain}}
 			</a>
 		</div>
