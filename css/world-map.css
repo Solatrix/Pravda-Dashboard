@@ -27,21 +27,40 @@ body{
     box-sizing: border-box;
     overflow: hidden;
     position: relative;
+    border-radius:15px;
+
 }
 
-#logo svg {
+#logotype {
 	width: 200px;
+    position: absolute;
+    left: 76px;
+    top:0px;
 
 }
 
-#logo {
+.logo {
 	display: flex;
 	flex-flow: row;
+    width: inherit;
+    height:90px ;
     position: absolute;
-    top: -6px;
-    left: 65px;
-    z-index: 999;
-    width: 150px;
+    z-index: 999999;
+    align-items: center;
+    justify-content: space-between;
+    width: 100vw;
+    padding: 0 65px 0 1rem;
+    box-sizing: border-box;
+}
+
+.logo-img{
+    background-color: #ffffff69;
+    width: 245px;
+    height: 51%;
+    border-radius: 66px;
+    margin: 0px 0px 4.5px 37px;
+    border: 1px solid #fff;
+    box-shadow: 0 0 3rem rgba(0, 0, 0, .1);
 }
 div#background-map{
     width:inherit;
@@ -51,28 +70,9 @@ div#background-map{
     left: 0;
     bottom: 0;
     border-radius:15px;
-}
-
-.map section, .map div{
-    height:fit-content !important;
-    z-index:99999;
 
 }
 
-.map{
-    width:inherit;
-    height:inherit;
-    box-sizing: border-box;
-    display: flex;
-    position: absolute;
-    top:0;
-    left: 0;
-    bottom: 0;
-    justify-content: space-between;
-    padding:25px 55px;
-
-
-}
 
 .tooltip{
 	width:fit-content;
@@ -235,4 +235,7 @@ dialog#feature-view .close-button{
 dialog{
     animation: show 750ms forwards;
 	opacity:0;
+}
+.leaflet-control-zoom{
+    transform: translate(20px, 85px);
 }
