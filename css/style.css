@@ -87,7 +87,6 @@ div.left {
 	display: flex;
 	flex-flow: row;
 	align-items: center;
-	width: 500px;
 	flex-wrap: nowrap;
 }
 
