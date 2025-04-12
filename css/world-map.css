@@ -1,21 +1,11 @@
 
+@import url("./general.css");
+@import url("./tabs.css");
 @import url("./plotly-graphs.css");
 @import url("./merge.css");
 
 body{
     background-color: transparent !important;
-}
-.hidden {
-	display: none !important;
-}
-
-.instrument-sans-text,
-.instrument-sans-label {
-	font-family: "Instrument Sans", sans-serif;
-	font-optical-sizing: auto;
-	font-weight: 400;
-	font-style: normal;
-	font-variation-settings:"width" 100;
 }
 
 body{
@@ -54,13 +44,13 @@ body{
 }
 
 .logo-img{
-    background-color: #ffffff69;
+    background-color: #ffffffb0;
     width: 245px;
     height: 51%;
     border-radius: 66px;
     margin: 0px 0px 4.5px 37px;
     border: 1px solid #fff;
-    box-shadow: 0 0 3rem rgba(0, 0, 0, .1);
+    box-shadow: 0 0 15px rgba(0, 0, 0, .045);
 }
 div#background-map{
     width:inherit;
@@ -142,24 +132,37 @@ dialog#feature-view{
     width: 80vw;
     height: 60vh;
     padding: 30px;
+    overflow:hidden;
+
+    .overlay-popup{
+        height:inherit;
+        width: inherit;
+        display: flex;
+        flex-flow: column;
+    }
+
     .container{
         display: flex;
         flex-flow: column;
         gap: 1.5rem;
         text-align: center;
+        overflow-y: scroll;
+        height: inherit;
     }
+
     .headline{
         display: flex;
         flex-flow: row;
-        align-items: center;
+        align-items: flex-start;
         justify-content: space-between;
-        margin: 15px 0px;
         margin-bottom: 20px;
         border-bottom: 1px solid rgba(0, 0, 0, .08);
         padding-bottom: 20px;
     }
+
         h3{
             margin: 0px;
+            font-weight: 600;
         }
 
         .domain{
@@ -172,9 +175,11 @@ dialog#feature-view{
             font-weight: normal;
             outline: none;
             text-decoration: none;
+
             &:before{
                 content:"Learn more: 🔗";
             }
+
             &:hover{
                 color:#525252;
                 text-decoration: underline;
@@ -185,16 +190,17 @@ dialog#feature-view{
 }
 
 dialog#feature-view .close-button{
+    display: block;
     position: absolute;
-    top: 15px;
-    right: 17px;
+    top: 10px;
+    right:15px;
     color:#525252;
     border-radius: 30px;
     width:15px;
     height: 15px;
     padding:3px;
     text-align: center;
-    line-height: 14px;
+    line-height: 12px;
     &:hover{
         background-color:rgba(0,0,0, .1);
         cursor:pointer;
@@ -238,4 +244,39 @@ dialog{
 }
 .leaflet-control-zoom{
     transform: translate(20px, 85px);
+}
+
+.tabbed{
+    height: inherit;
+
+}
+
+.tabbed label {
+    padding: 4px 16px;
+    text-align: center;
+    margin: 0 auto;
+}
+
+#metrics{
+    margin-top:15px;
+    overflow-y: scroll;
+    overflow-x:hidden;
+    height:inherit;
+}
+
+.tabbed input:checked:nth-of-type(1) ~ label:nth-of-type(1) {
+    width: fit-content;
+    border: 1px solid #ffffff;
+    border-radius: 18px;
+    background-color: #0dbf90;
+    color: #fff !important;
+    font-weight: 500;
+}
+.tabbed input:checked:nth-of-type(2) ~ label:nth-of-type(2) {
+    width: fit-content;
+    border: 1px solid #ffffff;
+    border-radius: 18px;
+    background-color: #0dbf90;
+    color: #fff !important;
+    font-weight: 500;
 }

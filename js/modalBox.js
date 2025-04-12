@@ -1,11 +1,14 @@
-import { popupHTML } from "./constants.js"
 import { renderHourlyGraph, renderPostingFrequencyChart, renderTopSourcesChart, renderCategories } from "./graphCollection.js";
 export const modalBox = async (feature, domains, world) => {
     const loadRemoteData = async (domain) =>
     {
-       
         return (await (await fetch(`https://raw.githubusercontent.com/CheckFirstHQ/pravda-network/refs/heads/main/json/${domain}_viz.json`)).json())
-    } 
+    }
+    
+    const loadTemplate = async() => {
+        return (await (await fetch('../res/modalBox.template.html')).text())
+    }
+
     let domainMap = domains.Regions[feature];
     if(!document.querySelector("dialog#feature-view")){
         const e = document.createElement('dialog');
@@ -13,7 +16,7 @@ export const modalBox = async (feature, domains, world) => {
         document.querySelector("body").appendChild(e)
     }
     const domain = domainMap[0]
-    let template = popupHTML.replaceAll("{{feature}}", feature)
+    let template = (await loadTemplate()).replaceAll("{{feature}}", feature)
         template = template.replaceAll("{{domain}}", domain)
 
     const dialog = document.querySelector("dialog#feature-view");
