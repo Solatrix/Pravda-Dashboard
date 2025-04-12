@@ -24,7 +24,7 @@ body{
 #logotype {
 	width: 200px;
     position: absolute;
-    left: 76px;
+    left: 37px;
     top:0px;
 
 }
@@ -48,7 +48,7 @@ body{
     width: 245px;
     height: 51%;
     border-radius: 66px;
-    margin: 0px 0px 4.5px 37px;
+    margin: 0px 0px 4.5px 0px;
     border: 1px solid #fff;
     box-shadow: 0 0 15px rgba(0, 0, 0, .045);
 }

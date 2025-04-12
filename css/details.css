@@ -88,7 +88,8 @@ div.left {
 }
 
 h2#countryName {
-	font-weight: 600;
+	font-weight: 500;
+    color: rgb(40, 47, 46);
 }
 
 .right {
