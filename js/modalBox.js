@@ -6,7 +6,7 @@ export const modalBox = async (feature, domains, world) => {
     }
     
     const loadTemplate = async() => {
-        return (await (await fetch('../res/modalBox.template.html')).text())
+        return (await (await fetch('./res/modalBox.template.html')).text())
     }
 
     let domainMap = domains.Regions[feature];
