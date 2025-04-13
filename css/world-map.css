@@ -125,7 +125,7 @@ path[stroke="#GGG"] {
 dialog#feature-view {
 	position: relative;
 	width: 600px;
-	height: 400px;
+	height: 430px;
 	padding: 30px;
 	overflow: hidden;
 	border-radius: 12px;
@@ -167,6 +167,7 @@ dialog#feature-view {
 		text-align: center;
 		overflow-y: scroll;
 		height: inherit;
+		width: 600px;
 	}
 
 	.headline {
@@ -291,10 +292,12 @@ dialog {
 }
 
 #metrics {
-	margin-top: 15px;
-	overflow-y: scroll;
-	overflow-x: hidden;
-	height: inherit;
+	margin-top: -8px;
+
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: inherit;
+    margin-left:-15px;
 }
 
 .tabbed input:checked:nth-of-type(n) + label.header:nth-of-type(n):before{

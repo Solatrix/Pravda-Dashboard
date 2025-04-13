@@ -142,7 +142,7 @@ p.small-caption{
     height: 100px;
     justify-content: space-between;
 }
-p.small-caption[data-count=0]{
+p.small-caption[data-count="0"]{
     display:none;
 }
 p.small-caption[data-count]:before{
