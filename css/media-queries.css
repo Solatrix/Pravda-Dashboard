@@ -28,7 +28,7 @@
 
     dialog#feature-view {
         max-width: 345px !important;
-        left: -23px !important;
+        left: 0 !important;
         box-sizing: border-box !important;
         padding: 19px!important;
 
