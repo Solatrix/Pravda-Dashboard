@@ -1,0 +1,116 @@
+@media only screen and (max-width: 435px) {
+    .logo-img{
+        width: 150px !important;
+        height: 30px !important;
+    }
+    svg#logotype{
+        width:115px !important;
+    }
+    .search-bar{
+        width: 54px;
+        margin-right: 57px;
+        input{
+            width: 110px !important;
+            margin-left: 13px !important;
+        }
+    }
+    .tabbed{
+        margin-left: 17px;
+    }
+    .tabbed label {
+        font-size: 14px !important;;
+    }
+
+    dialog#feature-view {
+        max-width: 345px !important;
+        left: -23px !important;
+        box-sizing: border-box !important;
+        padding: 19px!important;
+
+        .overlay-popup {
+            max-width: 350px!important;
+            position: absolute;
+            top: 23px!important;
+            right: 0!important;
+            bottom: 0!important;
+            left: 0!important;
+        }
+
+        .close-button {
+            right: initial!important;
+            left: 299px!important;
+            top: -5px!important;
+        }
+
+        .headline {
+            padding-left: 25px!important;
+
+            div {
+                display: none;
+            }
+        }
+    }
+
+    #fact-sheet {
+        padding: 0;
+    }
+
+    .arrow-controls {
+        left: 37px !important;
+    }
+
+    .arrow-left {
+        left: -36px !important;
+    }
+
+    .arrow-right {
+        right: initial !important;
+        left: 250px !important;
+    }
+
+    .slideshow {
+        margin-left: 0;
+
+        .side-element {
+            max-width: 400px;
+        }
+
+        .header-title {
+            display: none;
+        }
+
+        .row {
+            flex-flow: column !important;
+            width: 55vw;
+            transform: scale(.8);
+            margin-left: -25px;
+            margin-top: -15px;
+
+        }
+
+        .circle-pack-graph {
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-start;
+            margin-left: -175px;
+
+            gap: 33px;
+            max-height: 300px;
+            transform: scale(0.65);
+
+            p.small-caption {
+                font-size: 11pt !important;
+            }
+
+            svg.circle-pack g {
+                .circle~text:first-of-type {
+                    cursor: pointer;
+                    font-family: "Instrument Sans", Arial, Helvetica, sans-serif;
+                    font-weight: 500;
+                    transition: opacity 250ms ease;
+                    font-size: 14px !important;
+                }
+            }
+        }
+    }
+}
