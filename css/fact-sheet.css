@@ -1,3 +1,21 @@
+:root{
+    --secondary: #4c9d8b;
+    --accentSecondary: #30907b;
+}
+
+.col{
+    display: flex;
+    flex-direction: column;
+    flex-flow: column;
+    align-content: flex-end;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    text-align: right;
+    width: 150px;
+    height: 300px;
+    justify-content: center;
+    margin-left: 15px;
+}
 .slideshow{
     display: flex;
     flex-flow: row;
@@ -26,6 +44,15 @@
         a{
             text-decoration: none;
             color:transparent;
+            position: absolute;
+            z-index: 99999;
+
+        }
+        .arrow-left{
+            left:0;
+        }
+        .arrow-right{
+            right: 0;
         }
         .arrow-left:hover:before,
         .arrow-right:hover:before{
@@ -80,57 +107,92 @@ h4.figure{
 }
 
 p.caption{
-    font-size: 12pt;
+    font-size: 11pt;
     margin: auto 0;
     text-align: right;
     padding: 0;
 }
 .circle-pack-graph{
     display: flex;
-    flex-direction: row-reverse;
-    justify-content: center;
-    padding: 0 45px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin-left: 0;
+    margin-top: -45px;
+    gap: 33px;
+    max-height: 300px;
+    transform: scale(0.95);
+
 }
 
 .circle-pack{
     height: 500px;
     width: 500px;
-    transform: scale(.9);
-    margin-top: -50px;
+    margin-top: -70px;
+    margin-left: -58px;
 }
+
 p.small-caption{
-    font-size: 11pt;
-    min-width: 138px;
+    font-size: 9pt !important;
+    width: 100px;
     box-sizing: border-box;
     border: 1px solid black;
     padding: 10px;
-    height: fit-content;
     display: flex;
     flex-flow: column;
-    margin-left: 60px;
-    margin-right:-20px;
-
+    height: 100px;
+    justify-content: space-between;
 }
+p.small-caption[data-count=0]{
+    display:none;
+}
+p.small-caption[data-count]:before{
+    content: attr(data-count);
+    font-size: 24pt;
+    margin-bottom: -6px;
+    display: block;
+}
+
 svg.circle-pack g {
     transform: translate(100px, 100px);
-
+    &.tg-node .circle{
+        fill: var(--primary) !important;
+        stroke: var(--accent) !important;
+    }
     .circle {
-        fill: #4c9d8bcf;
-        stroke: #2d806e;
+        fill: var(--secondary);
+        stroke: var(--accentSecondary);
         stroke-width: 3px;
         cursor: pointer;
-        transition:fill, box-shadow 250ms ease;
+        opacity: .9;
+        transition:all 250ms ease;
+        &~text{
+            opacity: .4 !important;
+            transition: all 250ms ease;
+        }
         &:hover{
             fill: #4c9d8c;
             box-shadow: 0 0 6px rgba(0,0,0,.04);
+            stroke-width: 4px;
+            opacity: 1 !important;
+        }
+        &:hover~text:first-of-type{
+            opacity: 1 !important;
         }
     }
-    .circle + text{
-        font-family: "Instrument", Arial, Helvetica, sans-serif;
-        opacity: .5;
+    .circle~text:first-of-type{
+        cursor: pointer;
+
+        font-family: "Instrument Sans", Arial, Helvetica, sans-serif;
+        opacity: .8;
+        font-weight: 500;
         transition: opacity 250ms ease;
-        &:hover{
-            opacity: 1;
-        }
+        
+    }
+}
+.header-title {
+    margin: -12px 0px 0px -47px;
+    h5{
+        font-family: 'Instrument Sans', Arial, Helvetica, sans-serif;
+        font-weight: 500;
     }
 }

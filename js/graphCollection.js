@@ -201,7 +201,7 @@ export const renderCirclePack = async (data, target) => {
 		.data(layout)
 		.enter()
 		.append("g")
-		.attr("class", "circle-entity node");
+		.attr("class", (d) => { return `circle-entity node ${d.text.includes("Telegram") ? "tg-node" : "ru-node"}`});
 
 	nodes.append("circle")
 		.attr("class", "circle")
@@ -215,8 +215,7 @@ export const renderCirclePack = async (data, target) => {
 		const group = d3.select(this);
 		const radius = d.r - padding;
 		const maxWidth = radius * 1.6;
-
-		const words = d.text.split(/\s+/);
+		const words = d.text.replace("Telegram: \n", "").split(/\s+/);
 		const lines = [];
 		let line = [];
 
@@ -241,14 +240,13 @@ export const renderCirclePack = async (data, target) => {
 		const totalHeight = lines.length * lineHeight;
 		const textTooTall = totalHeight / 2 > radius;
 
-		const yOffset = textTooTall ? radius + 10 : -totalHeight / 2 + lineHeight / 2;
+		const yOffset = textTooTall ? radius + 20 : -totalHeight / 2 + lineHeight / 2;
 		const textGroup = group.append("text")
 			.attr("x", d.x)
-			.attr("y", d.y + yOffset)
+			.attr("y", d.y - yOffset)
 			.style("text-anchor", "middle")
 			.style("font-size", "12px")
 			.style("fill", "black")
-			.style("pointer-events", "none");
 
 		lines.forEach((lineText, i) => {
 			textGroup.append("tspan")

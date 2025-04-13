@@ -125,7 +125,7 @@ path[stroke="#GGG"] {
 dialog#feature-view {
 	position: relative;
 	width: 600px;
-	height: 60vh;
+	height: 400px;
 	padding: 30px;
 	overflow: hidden;
 	border-radius: 12px;

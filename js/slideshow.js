@@ -22,7 +22,7 @@ window.slideLeft = () => {
 
         }else{
             container.style.marginLeft = 0
-          
+            elems.forEach(e => e.classList.remove("active"))
             elems[0].classList.add("active")
         }
     }else{
