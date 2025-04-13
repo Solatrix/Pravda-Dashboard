@@ -3,6 +3,11 @@
 	display: none !important;
 }
 
+.disable{
+	cursor:not-allowed;
+	opacity: .1;
+	transition:none;
+}
 .instrument-sans-text,
 .instrument-sans-label {
 	font-family: "Instrument Sans", sans-serif;
@@ -29,4 +34,10 @@
 ::-webkit-scrollbar-thumb {
 	background: gray;
 	border-radius: 10px;
+}
+
+@keyframes show {
+	100% {
+		opacity: 1;
+	}
 }

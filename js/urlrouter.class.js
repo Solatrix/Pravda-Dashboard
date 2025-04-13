@@ -2,7 +2,6 @@ export class URLRouter{
     constructor(domainMap){
         this.location = window.location;
         this.args = new URLSearchParams(window.location.search);
-        console.log(domainMap)
         if(!this.args.get("view")) return
         
         if(this.args.get("view") === "world"){

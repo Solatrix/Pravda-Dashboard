@@ -18,7 +18,7 @@ import { renderPostingFrequencyChart, renderTopSourcesChart, renderCategories, r
 	async function domainToCountry(remoteData){
 		let data = await remoteData
 		const perDomain = data.articlesPerDomain;
-		const countryToDomainMap = await (await fetch("./res/pravda-all-domains.json")).json()
+		const countryToDomainMap = await (await fetch("./res/json/pravda-all-domains.json")).json()
 		const regions = Object.keys(countryToDomainMap.Regions)
 		let r = []
 		for(let region of regions){
@@ -65,7 +65,7 @@ import { renderPostingFrequencyChart, renderTopSourcesChart, renderCategories, r
 				pane:"labels"
 			}
 		).addTo(map);
-		fetch("./res/countries-min.geojson")
+		fetch("./res/json/countries-min.geojson")
 			.then((response) => response.json())
 			.then((geojsonData) => {
 				const geoJSONObj = L.geoJSON(geojsonData,
@@ -125,7 +125,7 @@ import { renderPostingFrequencyChart, renderTopSourcesChart, renderCategories, r
 	}
 
 	async function renderLeaderBoard(perDomain) {
-		const tableData = await fetch("./res/leaderBoard.template.html")
+		const tableData = await fetch("./res/html/leaderBoard.template.html")
 		const leaderBoardData = await perDomain
 		const uiTable = document.createElement("div")
 		uiTable.classList.add("leader-board-chart")

@@ -61,7 +61,7 @@ export const renderPostingFrequencyChart = async (remoteData, target) => {
 	Plotly.newPlot(target, [trace], layout, { responsive: true, displayModeBar: false });
 }
 
-export const renderTopSourcesChart =  async (remoteData, target) => {
+export const renderTopSourcesChart = async (remoteData, target) => {
 	let data = await remoteData
 	const sources = data.topSources
 		.map((entry) => entry.source.replace("Telegram:", "Telegram: <br>"))
@@ -116,11 +116,11 @@ export const renderCategories = async (remoteData, target) => {
 		values: counts,
 		automargin: true,
 		type: "pie",
-		textinfo:"percent",
+		textinfo: "percent",
 		hole: .6,
-		showlegend:true,
+		showlegend: true,
 		name: "Articles per category",
-		textposition:"inside"
+		textposition: "inside"
 
 	};
 
@@ -139,7 +139,7 @@ export const renderSourcesByDay = async (remoteData, target) => {
 	let sources = Object.keys(data[0]).filter(key => key !== 'date');
 
 	sources.forEach(source => {
-		const color = complementaryScale[random(0,4)]
+		const color = complementaryScale[random(0, 4)]
 		const trace = {
 			x: data.map(item => item.date),
 			y: data.map(item => item[source]),
@@ -162,7 +162,7 @@ export const renderSourcesByDay = async (remoteData, target) => {
 		yaxis: {
 			title: 'Articles'
 		},
-		hovermode:"closest",
+		hovermode: "closest",
 		legend: {
 			x: 1,
 			y: 1
@@ -172,5 +172,89 @@ export const renderSourcesByDay = async (remoteData, target) => {
 	Plotly.newPlot(target, traceData, layout, {
 		responsive: true,
 		displayModeBar: false
+	});
+}
+
+export const renderCirclePack = async (data, target) => {
+	const remoteData = await data
+	const dataset = remoteData.topSources.slice(0, 10)
+
+	const values = dataset.map(e => e.count)
+	const x = d3.scaleSqrt().range([15, 80]).domain([d3.min(values), d3.max(values)]).clamp(true)
+
+	let circles = dataset.map(
+		e => {
+			return {
+				r: x(e.count),
+				text: e.source.replace("Telegram:", "Telegram: \n")
+			}
+		}
+	)
+	circles = circles.sort((a, b) => b.r - a.r);
+	const padding = 5
+
+	const layout = d3.packSiblings(circles)
+	const container = d3.select(target);
+
+	const nodes = container
+		.selectAll("g.node")
+		.data(layout)
+		.enter()
+		.append("g")
+		.attr("class", "circle-entity node");
+
+	nodes.append("circle")
+		.attr("class", "circle")
+		.attr("cx", d => d.x)
+		.attr("cy", d => d.y)
+		.attr("r", d => d.r - padding)
+
+	const labelOffset = 10;
+	const lineHeight = 14;
+	nodes.each(function (d) {
+		const group = d3.select(this);
+		const radius = d.r - padding;
+		const maxWidth = radius * 1.6;
+
+		const words = d.text.split(/\s+/);
+		const lines = [];
+		let line = [];
+
+		const tempText = group.append("text")
+			.style("font-size", "12px")
+			.style("visibility", "hidden")
+			.style("pointer-events", "none");
+
+		words.forEach(word => {
+			line.push(word);
+			tempText.text(line.join(" "));
+			if (tempText.node().getComputedTextLength() > maxWidth) {
+				line.pop();
+				lines.push(line.join(" "));
+				line = [word];
+			}
+		});
+		if (line.length) lines.push(line.join(" "));
+		tempText.remove();
+
+		const lineHeight = 14;
+		const totalHeight = lines.length * lineHeight;
+		const textTooTall = totalHeight / 2 > radius;
+
+		const yOffset = textTooTall ? radius + 10 : -totalHeight / 2 + lineHeight / 2;
+		const textGroup = group.append("text")
+			.attr("x", d.x)
+			.attr("y", d.y + yOffset)
+			.style("text-anchor", "middle")
+			.style("font-size", "12px")
+			.style("fill", "black")
+			.style("pointer-events", "none");
+
+		lines.forEach((lineText, i) => {
+			textGroup.append("tspan")
+				.text(lineText)
+				.attr("x", d.x)
+				.attr("dy", i === 0 ? 0 : lineHeight);
+		});
 	});
 }

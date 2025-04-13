@@ -4,7 +4,6 @@ import { modalBox } from "./modalBox.js";
 (async (d3, L) => {
 	async function loadData() {
 		return {
-			country: await (await fetch("https://raw.githubusercontent.com/CheckFirstHQ/pravda-network/refs/heads/main/json/francais.news-pravda.com_viz.json")).json(),
 			perDomain: await (await fetch("https://raw.githubusercontent.com/CheckFirstHQ/pravda-network/refs/heads/main/json/all.news-pravda.com_viz.json")).json()
 		}
 	}
@@ -67,7 +66,7 @@ import { modalBox } from "./modalBox.js";
 				pane: "labels"
 			}
 		).addTo(map);
-		const geojson = await fetch("res/countries-min.geojson")
+		const geojson = await fetch("res/json/countries-min.geojson")
 			.then(async (response) => { 
 				let r = await response.json()
 				L.geoJSON(r,
@@ -98,7 +97,7 @@ import { modalBox } from "./modalBox.js";
 	async function domainToCountry(remoteData) {
 		let data = await remoteData
 		const perDomain = data.articlesPerDomain;
-		const countryToDomainMap = await (await fetch("res/pravda-all-domains.json")).json()
+		const countryToDomainMap = await (await fetch("res/json/pravda-all-domains.json")).json()
 		const regions = Object.keys(countryToDomainMap.Regions)
 		let r = []
 		for (let region of regions) {
@@ -166,7 +165,6 @@ import { modalBox } from "./modalBox.js";
 			const feature = e.target.dataset.featureName
 			const polygon = geojson.features.filter((entry) => entry.properties.ADMIN === feature)[0]
 			if(polygon){
-				console.log("zooming")
 				map.fitBounds(L.geoJSON(polygon).getBounds())
 			}
 			modalBox(feature, domains, world)
@@ -178,7 +176,7 @@ import { modalBox } from "./modalBox.js";
 	}
 
 	async function initialize() {
-		const { country, perDomain } = await loadData()
+		const { perDomain } = await loadData()
 		const { world, domains } = await domainToCountry(perDomain)
 		const searchInput = document.querySelector("input#search-input")
 		const {map, geojson} = await renderMap(world, domains);

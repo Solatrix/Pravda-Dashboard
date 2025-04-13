@@ -187,11 +187,7 @@ h2#countryName {
 }
 
 
-@keyframes show {
-	100% {
-		opacity: 1;
-	}
-}
+
 
 .graph-container-small g.hoverlayer path, .graph-container g.hoverlayer path{
 	transform:scale(1.2);

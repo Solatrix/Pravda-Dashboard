@@ -1,4 +1,5 @@
-import { renderHourlyGraph, renderPostingFrequencyChart, renderTopSourcesChart, renderCategories } from "./graphCollection.js";
+import { renderHourlyGraph, renderPostingFrequencyChart, renderTopSourcesChart, renderCategories, renderCirclePack } from "./graphCollection.js";
+import { localeNb, } from "./constants.js";
 export const modalBox = async (feature, domains, world) => {
     const loadRemoteData = async (domain) =>
     {
@@ -6,41 +7,91 @@ export const modalBox = async (feature, domains, world) => {
     }
     
     const loadTemplate = async() => {
-        return (await (await fetch('./res/modalBox.template.html')).text())
+        return (await (await fetch('./res/html/modalBox.template.html')).text())
     }
 
-    let domainMap = domains.Regions[feature];
-    if(!document.querySelector("dialog#feature-view")){
-        const e = document.createElement('dialog');
-        e.id = "feature-view"
-        document.querySelector("body").appendChild(e)
+    const loadFactSheet = async() => {
+        return (await(await fetch("./res/html/factSheet.template.html")).text())
     }
-    const domain = domainMap[0]
-    let template = (await loadTemplate()).replaceAll("{{feature}}", feature)
-        template = template.replaceAll("{{domain}}", domain)
 
-    const dialog = document.querySelector("dialog#feature-view");
-    dialog.innerHTML = template;
-    dialog.showModal();
+    const parseFactSheet = async (factSheet, remoteData) => {
+        const data = await remoteData
+        const orderByArticles = Object.entries(world).sort(([, a], [, b]) => a.totalArticles > b.totalArticles ? -1 : 0)
+        const orderByCountries = orderByArticles.map(e => e[0])
+        const topInfluencers = {
+            Telegram: data.topSourceNames
+                    .filter(e => e.includes("Telegram")),
+            Websites: data.topSourceNames
+                    .filter(e => !e.includes("Telegram"))
+        }
+        const datasheet = {
+            rank : orderByCountries.indexOf(feature)+1,
+            figure: localeNb.format(world[feature].totalArticles),
+            feature: feature,
+            "domain-list" : domains.Regions[feature].map(e => `<article class="domain-entry">${e}</article>`).join(""),
+            domains: domains.Regions[feature].length,
+            x : topInfluencers.Websites.length,
+            y : topInfluencers.Telegram.length
+        }
 
-    const resetView = () => dialog.close()
+        for(let entry in datasheet){
+            factSheet = factSheet.replaceAll(`{{${entry}}}`, datasheet[entry])
+        }
+        return factSheet
+    }
 
     const openNewTab = (e) => {
         e.preventDefault();
         window.open(e.target.href, '_blank').focus();
     }
-    
-    document.querySelector(".close-button").addEventListener("click", resetView)
-    const elements = document.querySelector('dialog .container');
-    elements.classList.add("hidden")
-    const data = await loadRemoteData(domain)
 
-    renderTopSourcesChart(data, "top-sources-chart")
-    renderHourlyGraph(data, "hourly-chart")
-    renderPostingFrequencyChart(data, "frequency-chart")
-    renderCategories(data, "category-chart")
-    elements.classList.remove("hidden")
-    document.querySelector("dialog#feature-view .loader_container").classList.add("hidden")
+    const renderContent = async (resetView, remoteData, openNewTab) => {
+        const data = await remoteData;
+        document.querySelector(".close-button").addEventListener("click", resetView);
+        renderCirclePack(data, "svg.circle-pack g")
+        renderTopSourcesChart(data, "top-sources-chart");
+        renderHourlyGraph(data, "hourly-chart");
+        renderPostingFrequencyChart(data, "frequency-chart");
+        renderCategories(data, "category-chart");
+        const elements = document.querySelector('dialog .container');
+
+        elements.classList.remove("hidden");
     
-    document.querySelector("a.domain").addEventListener("click", openNewTab)
+        document.querySelector("a.domain").addEventListener("click", openNewTab);
+    }
+    
+
+    const init = async () => {
+        const domain = domains.Regions[feature][0]
+        if(!document.querySelector("dialog#feature-view")){
+            const e = document.createElement('dialog');
+            e.id = "feature-view"
+            document.querySelector("body").appendChild(e)
+        }
+
+        let template = (await loadTemplate()).replaceAll("{{feature}}", feature)
+
+        const dialog = document.querySelector("dialog#feature-view");
+            dialog.innerHTML = template;
+        const elements = document.querySelector('dialog .container');
+            elements.classList.add("hidden");
+
+            dialog.showModal();
+
+        const data = await loadRemoteData(domain)
+        
+        let factSheet = await parseFactSheet(await loadFactSheet(), data)
+            template = template.replaceAll("{{fact-sheet}}", factSheet)
+            template = template.replaceAll("{{domain}}", domain)
+        dialog.innerHTML = template;
+        const input = document.querySelector(".tabbed input[checked]")
+        document.querySelector(`#${input.id.replace("-tab", "")}`).classList.remove("hidden")
+        const resetView = () => dialog.close()
+        await renderContent(resetView, data, openNewTab);
+        document.querySelector("dialog#feature-view .loader_container").classList.add("hidden");
+        
+    }
+    await init()
+
 }
+

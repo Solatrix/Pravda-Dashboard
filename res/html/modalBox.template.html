@@ -9,15 +9,17 @@
 		</div>
 	</div>
 	<div class="tabbed">
-		<!-- <input type="radio" id="fact-sheet-tab" name="tabs" class="hidden" checked>
+		<input type="radio" id="fact-sheet-tab" name="tabs" class="hidden" checked>
 		<label for="fact-sheet-tab" class="tab header">
 			Fact sheet
-		</label> -->
-		<input type="radio" id="metrics-tab" name="tabs" class="hidden" checked>
+		</label>
+		<input type="radio" id="metrics-tab" name="tabs" class="hidden">
 		<label for="metrics-tab" class="tab header">
 			Metrics
 		</label>
-		<!-- <div id="fact-sheet" class="tab-content"></div> -->
+		<div id="fact-sheet" class="tab-content hidden">
+			{{fact-sheet}}
+		</div>
 		<div id="metrics" class="tab-content">
 			<div class="container graph-container-small" data-feature-name="{{feature}}">
 				<article>

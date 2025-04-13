@@ -1,0 +1,136 @@
+.slideshow{
+    display: flex;
+    flex-flow: row;
+    width: max-content;
+    gap: 200px;
+    flex-wrap: wrap;
+    position: relative;
+    padding: 0 80px;
+    transition: margin-left 500ms ease;
+    .slide-element{
+        max-width: 400px;
+    }
+}
+#fact-sheet{
+    padding: 15px;
+
+    .arrow-controls{
+        position: absolute;
+        top: 55%;
+        width: 600px;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        left: 2rem;
+        
+        a{
+            text-decoration: none;
+            color:transparent;
+        }
+        .arrow-left:hover:before,
+        .arrow-right:hover:before{
+            opacity: .4;
+            transition: opacity .5s ;
+        }
+
+        .arrow-left::before,
+        .arrow-right::before{
+            content: "";
+            background: url(../res/img/left-arrow.svg);
+            width: 60px;
+            height: 60px;
+            display: block;
+            transform: scale(.5);
+            opacity: .17;
+            transition: opacity .2s;
+        }
+        .arrow-right{
+            transform: rotate(180deg);
+        }
+
+    }
+}
+
+.row{
+    display: flex;
+    flex-flow: row;
+}
+
+h4.figure{
+    font-size: 46pt;
+    margin: auto 0;
+    padding: 0;
+    font-weight: 200;
+}
+
+#square{
+    box-sizing: border-box;
+    display: block;
+    max-width: 163px;
+    max-height: 163px !important;
+    display: flex;
+    flex-flow: column;
+    padding: 14px;
+ 
+    align-items: flex-end;
+    transform: scale(.8);
+    justify-content: space-around;
+    border: 1px solid black;
+    flex-wrap: nowrap;
+}
+
+p.caption{
+    font-size: 12pt;
+    margin: auto 0;
+    text-align: right;
+    padding: 0;
+}
+.circle-pack-graph{
+    display: flex;
+    flex-direction: row-reverse;
+    justify-content: center;
+    padding: 0 45px;
+}
+
+.circle-pack{
+    height: 500px;
+    width: 500px;
+    transform: scale(.9);
+    margin-top: -50px;
+}
+p.small-caption{
+    font-size: 11pt;
+    min-width: 138px;
+    box-sizing: border-box;
+    border: 1px solid black;
+    padding: 10px;
+    height: fit-content;
+    display: flex;
+    flex-flow: column;
+    margin-left: 60px;
+    margin-right:-20px;
+
+}
+svg.circle-pack g {
+    transform: translate(100px, 100px);
+
+    .circle {
+        fill: #4c9d8bcf;
+        stroke: #2d806e;
+        stroke-width: 3px;
+        cursor: pointer;
+        transition:fill, box-shadow 250ms ease;
+        &:hover{
+            fill: #4c9d8c;
+            box-shadow: 0 0 6px rgba(0,0,0,.04);
+        }
+    }
+    .circle + text{
+        font-family: "Instrument", Arial, Helvetica, sans-serif;
+        opacity: .5;
+        transition: opacity 250ms ease;
+        &:hover{
+            opacity: 1;
+        }
+    }
+}
