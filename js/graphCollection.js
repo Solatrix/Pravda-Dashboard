@@ -126,6 +126,19 @@ export const renderCategories = async (remoteData, target) => {
 
 	const layout = {
 		colorway: complementaryScale,
+		legend: {
+			x: 0,
+			y: 1,
+			traceorder: 'normal',
+			font: {
+			  family: 'Instrument Sans',
+			  size: 12,
+			  color: '#000'
+			},
+			bgcolor: 'none',
+			bordercolor: 'none',
+			borderwidth: 0
+		},
 		...defaultLayout
 	};
 
@@ -238,9 +251,9 @@ export const renderCirclePack = async (data, target) => {
 
 		const lineHeight = 14;
 		const totalHeight = lines.length * lineHeight;
-		const textTooTall = totalHeight / 2 > radius;
+		const textTooTall = totalHeight / 2 > (radius+10);
 
-		const yOffset = textTooTall ? radius + 20 : -totalHeight / 2 + lineHeight / 2;
+		const yOffset = textTooTall ? (radius*2) + 5 : -totalHeight / 2 + lineHeight / 2;
 		const textGroup = group.append("text")
 			.attr("x", d.x)
 			.attr("y", d.y - yOffset)
