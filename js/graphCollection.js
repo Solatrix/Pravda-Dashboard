@@ -202,7 +202,7 @@ export const renderCirclePack = async (data, target) => {
 		.data(layout)
 		.enter()
 		.append("g")
-		.attr("class", (d) => { return `circle-entity node ${d.text.includes("Telegram") ? "tg-node" : "ru-node"}`});
+		.attr("class", (d) => { return `circle-entity node ${d.text.includes("Telegram") ? "tg-node" : "ru-node"}` });
 
 	nodes.append("circle")
 		.attr("class", "circle")
@@ -239,9 +239,9 @@ export const renderCirclePack = async (data, target) => {
 
 		const lineHeight = 14;
 		const totalHeight = lines.length * lineHeight;
-		const textTooTall = totalHeight / 2 > (radius+10);
+		const textTooTall = totalHeight / 2 > (radius + 10);
 
-		const yOffset = textTooTall ? (radius*2) + 5 : -totalHeight / 2 + lineHeight / 2;
+		const yOffset = textTooTall ? (radius * 2) + 5 : -totalHeight / 2 + lineHeight / 2;
 		const textGroup = group.append("text")
 			.attr("x", d.x)
 			.attr("y", d.y - yOffset)
@@ -258,14 +258,14 @@ export const renderCirclePack = async (data, target) => {
 	});
 }
 
-export const renderScatterChart =  async (target, remoteData) => {
+export const renderScatterChart = async (target, remoteData) => {
 	const data = await remoteData;
-		delete data["all.news-pravda.com"];
+	delete data["all.news-pravda.com"];
 	const domains = Object.keys(data);
 	const dates = Object.values(data);
 
 	const dateObjects = dates.map(date => new Date(date));
-	
+
 	const trace = {
 		x: dateObjects,
 		y: domains,
@@ -289,7 +289,7 @@ export const renderScatterChart =  async (target, remoteData) => {
 		yaxis: {
 			title: 'Domain',
 			visible: true,
-			showticklabels: false 
+			showticklabels: false
 		},
 		showlegend: false,
 		hovermode: 'closest',
@@ -301,3 +301,129 @@ export const renderScatterChart =  async (target, remoteData) => {
 		displayModeBar: false
 	});
 }
+
+export const findOutliers = async (remoteData, topN = 2) => {
+	const data = await remoteData;
+	const articlesPerDay = data.articlesPerDay;
+
+	function getTrimesterKey(date) {
+		const d = new Date(date);
+		const month = d.getMonth();
+		const trimester = Math.floor(month / 3) + 1;
+		return `${d.getFullYear()}-T${trimester}`;
+	}
+
+	function groupByTrimester(data) {
+		const groups = {};
+		for (const entry of data) {
+			const key = getTrimesterKey(entry.date);
+			if (!groups[key]) groups[key] = [];
+			groups[key].push(entry);
+		}
+		return groups;
+	}
+	const trimesters = groupByTrimester(articlesPerDay);
+	const outliers = [];
+
+	for (const [trimester, entries] of Object.entries(trimesters)) {
+		const counts = entries.map(e => e.count);
+		const mean = counts.reduce((a, b) => a + b, 0) / counts.length;
+		const stdDev = Math.sqrt(counts.map(c => Math.pow(c - mean, 2)).reduce((a, b) => a + b, 0) / counts.length);
+		const upperBound = mean + 2 * stdDev;
+
+		const localOutliers = entries
+			.filter(e => e.count > upperBound)
+			.map(e => ({
+				...e,
+				trimester,
+				mean: mean.toFixed(2),
+				stdDev: stdDev.toFixed(2),
+				upperBound: upperBound.toFixed(2),
+				overUpperBound: e.count - upperBound
+			}))
+			.sort((a, b) => b.overUpperBound - a.overUpperBound) // sort by how extreme
+			.slice(0, topN);
+
+		outliers.push(...localOutliers);
+	}
+
+	return outliers
+}
+
+export const filterBiggestOutliersPerTrimester = (data) => {
+	const grouped = {};
+	for (const entry of data) {
+		if (!grouped[entry.trimester]) grouped[entry.trimester] = [];
+		grouped[entry.trimester].push(entry);
+	}
+
+	const result = Object.values(grouped).flatMap(group => {
+		const maxCount = Math.max(...group.map(e => e.count));
+		return group.filter(e => e.count === maxCount);
+	});
+
+	return result.sort((a, b) => {
+		const dateCompare = new Date(a.date) - new Date(b.date);
+		return dateCompare !== 0 ? dateCompare : b.count - a.count;
+	});
+}
+
+export const renderOutliersGraph = async (remoteData, target) => {
+	const data = filterBiggestOutliersPerTrimester( await findOutliers(await remoteData, 5))
+	const regularData = (await remoteData).articlesPerDay;
+
+	const dates = data.map(item => item.date);
+	const counts = data.map(item => item.count);
+	const upperBounds = data.map(item => item.upperBound);
+
+	
+	const trace = {
+		x: dates,
+		y: counts,
+		mode: 'lines+markers',
+		type: 'scatter',
+		name: 'Max. of articles posted',
+		line: { color: complementaryScale[2] },
+		marker: {
+			color: counts.map((count, index) => count > upperBounds[index] ? '#158467' : 'blue'),
+			size: 10
+		}
+	};
+
+	const frequencyArticles = {
+		x: regularData.map(e => e.date),
+		y: regularData.map(e => e.count),
+		mode: 'lines',
+		type: 'scatter',
+		name: 'Articles',
+		line: { color: '#0dbf90', opacity: ".7"},
+		hoverinfo:"skip"
+	};
+
+
+	const upperBoundTrace = {
+		x: dates,
+		y: upperBounds,
+		mode: 'lines',
+		type: 'scatter',
+		name: 'Threshold',
+		line: { color: 'orange', dash: 'dash' }
+	};
+
+	const layout = {
+		title:"Surges in activity",
+		yaxis: {
+			title: 'Articles'
+		},
+		height: 600,
+		showlegend:false,
+		
+		... defaultLayout
+	};
+
+	Plotly.newPlot(target, [frequencyArticles, upperBoundTrace, trace], layout, {
+		responsive: true,
+		displayModeBar: false
+	});
+}
+

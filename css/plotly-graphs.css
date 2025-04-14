@@ -105,3 +105,16 @@
     box-sizing: border-box;
 	padding: 0px 16px;
 }
+
+#outliers-chart{
+    width: 800px !important;
+    margin-left: -30px;
+    transform: scale(.75) translate(-172px, -119px);
+	g.axistext text{
+		font-size:11px !important;
+		transform: translateY(2rem) !important;
+	}
+	g.axistext path{
+		transform:scale(1.7);
+	}
+}

@@ -1,19 +1,12 @@
-import { renderHourlyGraph, renderPostingFrequencyChart, renderTopSourcesChart, renderCategories, renderCirclePack } from "./graphCollection.js";
+import { renderHourlyGraph, renderPostingFrequencyChart, renderTopSourcesChart, renderCategories, renderCirclePack, renderOutliersGraph } from "./graphCollection.js";
 import { localeNb, } from "./constants.js";
 export const modalBox = async (feature, domains, world) => {
-    const loadRemoteData = async (domain) =>
-    {
-        return (await (await fetch(`https://raw.githubusercontent.com/CheckFirstHQ/pravda-network/refs/heads/main/json/${domain}_viz.json`)).json())
-    }
+    const loadRemoteData = async (domain) => (await (await fetch(`https://raw.githubusercontent.com/CheckFirstHQ/pravda-network/refs/heads/main/json/${domain}_viz.json`)).json())
     
-    const loadTemplate = async() => {
-        return (await (await fetch('./res/html/modalBox.template.html')).text())
-    }
+    const loadTemplate = async() =>  (await (await fetch('./res/html/modalBox.template.html')).text())
 
-    const loadFactSheet = async() => {
-        return (await(await fetch("./res/html/factSheet.template.html")).text())
-    }
-
+    const loadFactSheet = async() =>  (await(await fetch("./res/html/factSheet.template.html")).text())
+    
     const parseFactSheet = async (factSheet, remoteData) => {
         const data = await remoteData
         const orderByArticles = Object.entries(world).sort(([, a], [, b]) => a.totalArticles > b.totalArticles ? -1 : 0)
@@ -24,6 +17,7 @@ export const modalBox = async (feature, domains, world) => {
             Websites: data.topSourceNames
                     .filter(e => !e.includes("Telegram"))
         }
+
         const datasheet = {
             rank : orderByCountries.indexOf(feature)+1,
             figure: localeNb.format(world[feature].totalArticles),
@@ -57,11 +51,11 @@ export const modalBox = async (feature, domains, world) => {
         }
     }
 
-    const unHighlightFeatures = () => {
+    const unHighlightFeatures = () => 
         Array
             .from(document.querySelectorAll("svg.circle-pack g circle"))
-            .forEach(c => c.classList.remove("highlight"))
-    }
+            .forEach(c => c.classList.remove("highlight"));
+        
     const renderContent = async (resetView, remoteData, openNewTab) => {
         const data = await remoteData;
         document.querySelector(".close-button").addEventListener("click", resetView);
@@ -78,19 +72,21 @@ export const modalBox = async (feature, domains, world) => {
         renderPostingFrequencyChart(data, "frequency-chart");
         renderCategories(data, "category-chart",{
             legend: {
-                        x: 0,
-                        y: 1,
-                        traceorder: 'normal',
-                        font: {
-                          family: 'Instrument Sans',
-                          size: 12,
-                          color: '#000'
-                        },
-                        bgcolor: 'none',
-                        bordercolor: 'none',
-                        borderwidth: 0
-                    }
+                x: 0,
+                y: 1,
+                traceorder: 'normal',
+                font: {
+                    family: 'Instrument Sans',
+                    size: 12,
+                    color: '#000'
+                },
+                bgcolor: 'none',
+                bordercolor: 'none',
+                borderwidth: 0
+            }
         });
+        
+        renderOutliersGraph(data, "outliers-chart")
         const elements = document.querySelector('dialog .container');
 
         elements.classList.remove("hidden");

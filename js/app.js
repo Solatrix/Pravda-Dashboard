@@ -52,7 +52,6 @@ import { renderPostingFrequencyChart, renderTopSourcesChart, renderCategories, r
 			scrollWheelZoom: false
 		})
 
-		// map.dragging.disable();
 		map.attributionControl.setPosition('bottomleft');
 		map.createPane("labels")
 		map.getPane("labels").style.zIndex = 99999;
