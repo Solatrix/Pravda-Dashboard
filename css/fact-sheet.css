@@ -212,9 +212,9 @@ svg.circle-pack g {
         opacity: .8;
         font-weight: 500;
         transition: opacity 250ms ease;
-        
     }
 }
+
 .header-title {
     margin: -12px 0px 0px -47px;
     h5{

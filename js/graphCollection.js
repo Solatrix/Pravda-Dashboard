@@ -408,6 +408,7 @@ export const renderOutliersGraph = async (remoteData, target) => {
 		mode: 'lines',
 		type: 'scatter',
 		name: 'Threshold',
+		hoverinfo: "skip",
 		line: { color: 'orange', dash: 'dash' }
 	};
 

@@ -138,7 +138,7 @@
         }
         g.axistext text {
             font-size: 11px !important;
-            transform: translateY(.35rem) !important;
+            transform: translateY(-.35rem) !important;
         }
     }
   
