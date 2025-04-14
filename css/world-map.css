@@ -133,7 +133,6 @@ dialog#feature-view {
 	outline: none;
 	box-shadow: 0 0 10px rgba(0, 0, 0, .2);
 	background: linear-gradient(0deg, rgba(240, 238, 238, 0.95) 0%, rgba(237, 237, 237, 0.95) 35%, rgba(255, 255, 255, .95) 100%);
-	left: -45px;
 
 	.loader_container {
 		width: inherit;
