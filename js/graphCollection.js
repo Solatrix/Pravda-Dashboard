@@ -256,3 +256,47 @@ export const renderCirclePack = async (data, target) => {
 		});
 	});
 }
+
+export const renderScatterChart =  async (target, remoteData) => {
+	const data = await remoteData;
+		delete data["all.news-pravda.com"];
+	const domains = Object.keys(data);
+	const dates = Object.values(data);
+
+	const dateObjects = dates.map(date => new Date(date));
+	
+	const trace = {
+		x: dateObjects,
+		y: domains,
+		mode: 'markers',
+		type: 'scatter',
+		marker: {
+			size: 12,
+			color: colorScale[3],
+			opacity: 0.6
+		},
+		text: domains,
+		hoverinfo: 'text'
+	};
+
+	const layout = {
+		title: 'Pravda Websites First Recorded Activity',
+		xaxis: {
+			title: 'Date',
+			type: 'date',
+		},
+		yaxis: {
+			title: 'Domain',
+			visible: true,
+			showticklabels: false 
+		},
+		showlegend: false,
+		hovermode: 'closest',
+		...defaultLayout
+	};
+
+	Plotly.newPlot(target, [trace], layout, {
+		responsive: true,
+		displayModeBar: false
+	});
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Pravda Dashboard - Network history</title>
+	<style>
+		body{
+			margin: 0 auto;
+		}
+		.graph-container g.hoverlayer > g.hovertext,
+		.graph-container g.hoverlayer > g.axistext{
+			animation: show 250ms forwards;
+			opacity:0;
+		}
+		.graph-container g.hoverlayer path,
+		.graph-container g.hoverlayer path {
+			fill: hsl(132, 100%, 99%) !important;
+			stroke: rgba(0, 0, 0, 0.4) !important;
+			stroke-width: .2px !important;
+			filter: drop-shadow(0 5px 10px rgba(0, 0, 0, .12));
+
+		}
+		.graph-container g.hoverlayer text,
+		.graph-container g.hoverlayer text {
+			font-family: "Instrument Sans", "Helvetica", sans-serif !important;
+			fill: #282f2e !important;
+			font-size: .8rem !important;
+
+		}
+
+		.graph-container g.hoverlayer text tspan:first-child {
+			font-weight: 600;
+		}
+
+		@keyframes show {
+			100% {
+				opacity: 1;
+			}
+		}
+	</style>
+	<link rel="stylesheet" href="../css/general.css">
+</head>
+
+<body>
+	<div class="graph-container">
+		<div id="scatter-chart"></div>
+	</div>
+	<!-- Plotly.js -->
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+	<!-- D3.js -->
+	<script src="https://unpkg.com/d3@5.7.0/dist/d3.min.js"></script>
+
+	<script type="module">
+		import { renderScatterChart } from "../js/graphCollection.js"
+		(async () => {
+			const data = (await (await fetch("../res/json/domainActiveSince.json")).json())
+			renderScatterChart("scatter-chart", data)
+		})()
+
+	</script>
+</body>
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap"
+	rel="stylesheet">
+
+</html>
