@@ -1,4 +1,4 @@
-const gap = 200
+const gap = 300
 window.slideLeft = () => {
     const container = document.querySelector(".slideshow")
     const ref = document.querySelector(".slide-element")
