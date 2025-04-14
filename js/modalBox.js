@@ -46,22 +46,21 @@ export const modalBox = async (feature, domains, world) => {
     }
 
     const highlightFeatures = (e) => {
-        console.log("entering")
-        const elem = e.target;
-        if(elem.classList.contains("tg-caption")){
+        if(e.target.classList.contains("tg-caption")){
             const circles = Array.from(document.querySelectorAll("svg.circle-pack g.tg-node .circle"));
             circles.forEach(c => c.classList.add("highlight")) 
         }
-        if(elem.classList.contains("web-caption")){
-            const circles = Array.from(document.querySelectorAll("svg.circle-pack g.ru-node circle"));
-            circles.forEach(c => c.classList.add("highlight")) 
+        if(e.target.classList.contains("web-caption")){
+            Array
+            .from(document.querySelectorAll("svg.circle-pack g.ru-node circle"))
+            .forEach(c => c.classList.add("highlight")) 
         }
     }
 
-    const unHighlightFeatures = (e) => {
-        console.log("leaving")
-        const circles = Array.from(document.querySelectorAll("svg.circle-pack g circle"));
-        circles.forEach(c => c.classList.remove("highlight")) 
+    const unHighlightFeatures = () => {
+        Array
+            .from(document.querySelectorAll("svg.circle-pack g circle"))
+            .forEach(c => c.classList.remove("highlight"))
     }
     const renderContent = async (resetView, remoteData, openNewTab) => {
         const data = await remoteData;

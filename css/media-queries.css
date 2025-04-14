@@ -118,4 +118,15 @@
             }
         }
     }
+    #metrics .container{
+        transform: scale(.6) translate(-277px, -70px);
+
+    }
+    svg g.axistext text tspan,
+    svg g.axistext text{
+        font-size: 9px !important;
+    }
+    .graph-container-small g.hoverlayer .axistext path, .graph-container g.hoverlayer .axistext path {
+        transform: scale(1.4) translateY(-.175rem);
+    }
 }
