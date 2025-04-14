@@ -99,6 +99,9 @@
 	}
 }
 .graph-container-small, .graph-container{
-	width: 633px !important;
     transform: scale(.9) translate(-19px, -4px);
+	width: 694px !important;
+    transform: scale(.9) translate(-56px, -4px);
+    box-sizing: border-box;
+	padding: 0px 16px;
 }
