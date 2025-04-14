@@ -93,11 +93,16 @@ h4.figure{
 #square{
     box-sizing: border-box;
     display: block;
-    max-width: 163px;
-    max-height: 163px !important;
+    --size: 150px;
+    width: var(--size) !important;
+    height:  var(--size) !important;
+    min-width:  var(--size) !important;
+    min-height:  var(--size) !important;
+    max-width:  var(--size) !important;
+    max-height:  var(--size) !important;
     display: flex;
     flex-flow: column;
-    padding: 14px;
+    padding: 8px;
  
     align-items: flex-end;
     transform: scale(.8);

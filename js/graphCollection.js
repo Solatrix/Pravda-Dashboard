@@ -382,7 +382,7 @@ export const renderOutliersGraph = async (remoteData, target) => {
 		y: counts,
 		mode: 'lines+markers',
 		type: 'scatter',
-		name: 'Max. of articles posted',
+		name: 'Publications',
 		line: { color: complementaryScale[2] },
 		marker: {
 			color: counts.map((count, index) => count > upperBounds[index] ? '#158467' : 'blue'),
@@ -396,6 +396,7 @@ export const renderOutliersGraph = async (remoteData, target) => {
 		mode: 'lines',
 		type: 'scatter',
 		name: 'Articles',
+		fill: colorScale[2],
 		line: { color: '#0dbf90', opacity: ".7"},
 		hoverinfo:"skip"
 	};

@@ -129,4 +129,17 @@
     .graph-container-small g.hoverlayer .axistext path, .graph-container g.hoverlayer .axistext path {
         transform: scale(1.4) translateY(-.175rem);
     }
+    #outliers-chart{
+        width: 800px !important;
+        margin-left: -30px;
+        transform: scale(.5) translate(-1050px, -190px) !important; 
+        g.axistext path {
+            transform: scale(1.7) translateY(-11px);
+        }
+        g.axistext text {
+            font-size: 11px !important;
+            transform: translateY(.35rem) !important;
+        }
+    }
+  
 }
