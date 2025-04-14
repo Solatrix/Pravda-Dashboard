@@ -111,6 +111,7 @@ p.caption{
     margin: auto 0;
     text-align: right;
     padding: 0;
+    box-sizing: border-box;
 }
 .circle-pack-graph{
     display: flex;
@@ -141,15 +142,36 @@ p.small-caption{
     flex-flow: column;
     height: 100px;
     justify-content: space-between;
+    transition:all 250ms ease;
+    cursor:pointer;
 }
 p.small-caption[data-count="0"]{
     display:none;
 }
+
 p.small-caption[data-count]:before{
     content: attr(data-count);
     font-size: 24pt;
     margin-bottom: -6px;
     display: block;
+}
+
+p.tg-caption{
+    background: #0dbf9057 !important;
+    color: #14543f !important;
+    border: 1px solid var(--accent) !important;
+    &:hover{
+        border: 3px solid var(--accent) !important;
+    }
+}
+
+p.web-caption{
+    background: #4c9d8b9c !important;
+    border: 1px solid #105143 !important;
+    color: #105143 !important;
+    &:hover{
+        border: 3px solid #105143 !important;
+    }
 }
 
 svg.circle-pack g {
@@ -169,19 +191,18 @@ svg.circle-pack g {
             opacity: .4 !important;
             transition: all 250ms ease;
         }
-        &:hover{
+        &:hover, &.highlight{
             fill: #4c9d8c;
             box-shadow: 0 0 6px rgba(0,0,0,.04);
             stroke-width: 4px;
             opacity: 1 !important;
         }
-        &:hover~text:first-of-type{
+        &:hover~text:first-of-type, &.highlight ~text:first-of-type{
             opacity: 1 !important;
         }
     }
     .circle~text:first-of-type{
         cursor: pointer;
-
         font-family: "Instrument Sans", Arial, Helvetica, sans-serif;
         opacity: .8;
         font-weight: 500;

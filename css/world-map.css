@@ -92,7 +92,7 @@ div#background-map {
 }
 
 path[stroke="#GGG"] {
-	cursor: not-allowed;
+	cursor:default;
 }
 
 .search-bar-results {

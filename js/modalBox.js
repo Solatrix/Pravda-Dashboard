@@ -45,12 +45,37 @@ export const modalBox = async (feature, domains, world) => {
         window.open(e.target.href, '_blank').focus();
     }
 
+    const highlightFeatures = (e) => {
+        console.log("entering")
+        const elem = e.target;
+        if(elem.classList.contains("tg-caption")){
+            const circles = Array.from(document.querySelectorAll("svg.circle-pack g.tg-node .circle"));
+            circles.forEach(c => c.classList.add("highlight")) 
+        }
+        if(elem.classList.contains("web-caption")){
+            const circles = Array.from(document.querySelectorAll("svg.circle-pack g.ru-node circle"));
+            circles.forEach(c => c.classList.add("highlight")) 
+        }
+    }
+
+    const unHighlightFeatures = (e) => {
+        console.log("leaving")
+        const circles = Array.from(document.querySelectorAll("svg.circle-pack g circle"));
+        circles.forEach(c => c.classList.remove("highlight")) 
+    }
     const renderContent = async (resetView, remoteData, openNewTab) => {
         const data = await remoteData;
         document.querySelector(".close-button").addEventListener("click", resetView);
+        
         renderCirclePack(data, "svg.circle-pack g")
         renderTopSourcesChart(data, "top-sources-chart");
         renderHourlyGraph(data, "hourly-chart");
+
+        Array.from(document.querySelectorAll("p.small-caption")).
+        forEach(e => e.addEventListener("mouseenter", highlightFeatures));
+        Array.from(document.querySelectorAll("p.small-caption")).
+        forEach(e => e.addEventListener("mouseleave", unHighlightFeatures));
+
         renderPostingFrequencyChart(data, "frequency-chart");
         renderCategories(data, "category-chart");
         const elements = document.querySelector('dialog .container');
@@ -75,11 +100,9 @@ export const modalBox = async (feature, domains, world) => {
             dialog.innerHTML = template;
         const elements = document.querySelector('dialog .container');
             elements.classList.add("hidden");
-
             dialog.showModal();
 
         const data = await loadRemoteData(domain)
-        
         let factSheet = await parseFactSheet(await loadFactSheet(), data)
             template = template.replaceAll("{{fact-sheet}}", factSheet)
             template = template.replaceAll("{{domain}}", domain)
@@ -91,6 +114,7 @@ export const modalBox = async (feature, domains, world) => {
         document.querySelector("dialog#feature-view .loader_container").classList.add("hidden");
         
     }
+
     await init()
 
 }
