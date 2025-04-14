@@ -77,7 +77,21 @@ export const modalBox = async (feature, domains, world) => {
         forEach(e => e.addEventListener("mouseleave", unHighlightFeatures));
 
         renderPostingFrequencyChart(data, "frequency-chart");
-        renderCategories(data, "category-chart");
+        renderCategories(data, "category-chart",{
+            legend: {
+                        x: 0,
+                        y: 1,
+                        traceorder: 'normal',
+                        font: {
+                          family: 'Instrument Sans',
+                          size: 12,
+                          color: '#000'
+                        },
+                        bgcolor: 'none',
+                        bordercolor: 'none',
+                        borderwidth: 0
+                    }
+        });
         const elements = document.querySelector('dialog .container');
 
         elements.classList.remove("hidden");

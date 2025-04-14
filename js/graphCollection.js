@@ -105,7 +105,7 @@ export const renderTopSourcesChart = async (remoteData, target) => {
 	Plotly.newPlot(target, [trace], layout, { responsive: true, displayModeBar: false });
 }
 
-export const renderCategories = async (remoteData, target) => {
+export const renderCategories = async (remoteData, target, legendOpt = {}) => {
 	let data = await remoteData
 	const sources = data.categories.map((entry) => entry.category);
 	const counts = data.categories.map((entry) => entry.count);
@@ -126,19 +126,7 @@ export const renderCategories = async (remoteData, target) => {
 
 	const layout = {
 		colorway: complementaryScale,
-		legend: {
-			x: 0,
-			y: 1,
-			traceorder: 'normal',
-			font: {
-			  family: 'Instrument Sans',
-			  size: 12,
-			  color: '#000'
-			},
-			bgcolor: 'none',
-			bordercolor: 'none',
-			borderwidth: 0
-		},
+		...legendOpt,
 		...defaultLayout
 	};
 
