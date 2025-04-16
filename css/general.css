@@ -11,7 +11,7 @@
 .disable{
 	cursor:not-allowed;
 	opacity: .1;
-	transition:none;
+	transition: opacity 100ms ease;
 }
 .instrument-sans-text,
 .instrument-sans-label {
