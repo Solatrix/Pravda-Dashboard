@@ -43,7 +43,7 @@ window.slideRight = (e) => {
     const ref = document.querySelector(".slide-element")
     const elems = Array.from(document.querySelectorAll(".slide-element"));
     const activeEl = elems.filter(e => e.classList.contains("active"))[0];
-    const totalSize = (elems.length * ref.offsetWidth) + elems.length * container.style.gap;
+    const totalSize = (elems.length * ref.offsetWidth) + elems.length * gap;
     const leftBtn = document.querySelector(".arrow-left")
     const rightBtn = document.querySelector(".arrow-right")
     
