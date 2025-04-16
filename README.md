@@ -16,6 +16,8 @@ The repository leverages libraries such as D3.js, Plotly, and Leaflet. Additiona
 
 For a more comprehensive dashboard experience, visit CheckFirst's [Pravda Dashboard](https://portal-kombat.com).
 
+Check-out the map in action on my [GitHub pages](https://solatrix.github.io/Pravda-Dashboard/)
+
 ## License and Attribution
 
 CheckFirst. Pravda Network Data Collection. [GitHub Repository](https://github.com/CheckFirstHQ/pravda-network).
