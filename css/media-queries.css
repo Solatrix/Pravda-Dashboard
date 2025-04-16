@@ -120,7 +120,7 @@
     }
     #metrics .container{
         transform: scale(.6) translate(-277px, -70px);
-
+        overflow-x: hidden;
     }
     svg g.axistext text tspan,
     svg g.axistext text{
