@@ -4,7 +4,7 @@ import { modalBox } from "./modalBox.js";
 (async (d3, L) => {
 	async function loadData() {
 		return {
-			perDomain: await (await fetch("https://raw.githubusercontent.com/CheckFirstHQ/pravda-network/refs/heads/main/json/all.news-pravda.com_viz.json")).json()
+			perDomain: await (await fetch("https://raw.githubusercontent.com/CheckFirstHQ/pravda-network/refs/heads/main/json/a.network.news-pravda.com_viz.json")).json()
 		}
 	}
 	async function renderMap(remoteData, domains) {

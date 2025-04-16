@@ -6,7 +6,7 @@ import { renderPostingFrequencyChart, renderTopSourcesChart, renderCategories, r
 
 	async function loadData() {
 		return {
-			perDomain : await (await fetch("https://raw.githubusercontent.com/CheckFirstHQ/pravda-network/refs/heads/main/json/all.news-pravda.com_viz.json")).json()
+			perDomain : await (await fetch("https://raw.githubusercontent.com/CheckFirstHQ/pravda-network/refs/heads/main/json/a.network.news-pravda.com_viz.json")).json()
 		}
 	}
 	async function loadCountry(domain) {

@@ -260,7 +260,7 @@ export const renderCirclePack = async (data, target) => {
 
 export const renderScatterChart = async (target, remoteData) => {
 	const data = await remoteData;
-	delete data["all.news-pravda.com"];
+	delete data["a.network.news-pravda.com"];
 	const domains = Object.keys(data);
 	const dates = Object.values(data);
 

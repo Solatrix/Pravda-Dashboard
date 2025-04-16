@@ -6,7 +6,7 @@ export class URLRouter{
         
         if(this.args.get("view") === "world"){
             this.region = "World"
-            this.domain = "all.news-pravda.com"
+            this.domain = "a.network.news-pravda.com"
         }
         else if(domainMap.Regions[this.args.get("view")]){
             this.domain = domainMap.Regions[this.args.get("view")][0]
