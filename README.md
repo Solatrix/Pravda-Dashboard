@@ -10,7 +10,7 @@ Explore the near real-time updated dataset published by CheckFirst in their [rep
 
 This repository hosts the code for visuals accompanying a piece published on the DFRLab website, illustrating the global footprint of the Pravda Network.
 
-For deeper insights into the tactics employed by this network and the countries it targets, refer to DFRLab's detailed blog post.
+For deeper insights into the tactics employed by this network and the countries it targets, refer to [DFRLab's detailed blog post](https://dfrlab.org/the-pravda-network/).
 
 The repository leverages libraries such as D3.js, Plotly, and Leaflet. Additional resources include the CSS merge loader by [jh3y](https://jheytompkins.com). The remaining code is written in vanilla Javascript.
 
@@ -21,5 +21,8 @@ Check-out the map in action on my [GitHub pages](https://solatrix.github.io/Prav
 ## License and Attribution
 
 CheckFirst. Pravda Network Data Collection. [GitHub Repository](https://github.com/CheckFirstHQ/pravda-network).
+
+If you wish to refer to this web app in future publications please do mention
+`Valentin Châtelet. Pravda Dashboard - World Map. GitHub repository: https://github.com/Solatrix/Pravda-Dashboard`
 
 **Maintainer:** Valentin Châtelet
