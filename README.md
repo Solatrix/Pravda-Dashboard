@@ -22,7 +22,7 @@ Check-out the map in action on my [GitHub pages](https://solatrix.github.io/Prav
 
 CheckFirst. Pravda Network Data Collection. [GitHub Repository](https://github.com/CheckFirstHQ/pravda-network).
 
-If you wish to refer to this web app in future publications please do mention
+If you wish to refer to this app in your publications please do mention:
 `Valentin Châtelet. Pravda Dashboard - World Map. GitHub repository: https://github.com/Solatrix/Pravda-Dashboard`
 
 **Maintainer:** Valentin Châtelet
