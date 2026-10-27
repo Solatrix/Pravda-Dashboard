@@ -28,6 +28,9 @@ const langName = (() => {
 	return code => { try { return dn ? dn.of(code) : code; } catch { return code; } };
 })();
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+// Phones and low-memory devices: same outlines, but no height animation (it rebuilds every country's
+// 3D shape on each frame) and coarser country caps, so building the globe doesn't freeze the page.
+const lightGlobe = matchMedia("(max-width: 900px)").matches || (navigator.deviceMemory || 8) <= 4;
 const TYPE_LABEL = { country: "Country", subnational: "Sub-national", supranational: "Supranational", thematic: "Thematic", hub: "Network hub" };
 const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const isTelegram = s => s.startsWith("Telegram:");
@@ -436,12 +439,13 @@ const Map3D = {
 		this.metric = { kind: "total" };
 		this.drawn = new Promise(res => this.markDrawn = res);
 
-		const g = this.g = Globe({ animateIn: !reduceMotion })(el)
+		const g = this.g = Globe({ animateIn: !reduceMotion && !lightGlobe })(el)
 			.backgroundColor("rgba(0,0,0,0)")
 			.showGraticules(true)
 			.polygonsData(feats)
 			.onGlobeReady(() => this.whenDrawn())
-			.polygonsTransitionDuration(reduceMotion ? 0 : 600)
+			.polygonsTransitionDuration(reduceMotion || lightGlobe ? 0 : 600)
+			.polygonCapCurvatureResolution(lightGlobe ? 10 : 5)
 			.polygonAltitude(f => this.alt(f))
 			.polygonCapColor(f => this.cap(f))
 			.polygonSideColor(f => this.side(f))
@@ -454,6 +458,7 @@ const Map3D = {
 			.htmlAltitude(0.02)
 			.htmlElement(p => this.pin(p))
 			.onZoom(pov => el.classList.toggle("labels-on", pov.altitude < 1.9));
+		g.renderer().setPixelRatio(Math.min(devicePixelRatio, 2));
 		g.controls().minDistance = 140;
 		g.controls().maxDistance = 520;
 		g.pointOfView({ lat: 38, lng: 18, altitude: 2.25 }, 0);
