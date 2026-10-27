@@ -95,6 +95,7 @@ body[data-state="error"] .ld-bar i { background: var(--up); }
 .rank { display: inline-block; min-width: 2.2em; font: 11px var(--f-data); color: var(--ink-2); }
 .chip { font: 500 9.5px/1 var(--f-data); letter-spacing: .04em; text-transform: uppercase; padding: 3px 5px; border-radius: 3px; margin-left: 6px; vertical-align: 1px; }
 .chip-tg { color: var(--tg); background: color-mix(in srgb, var(--tg) 14%, transparent); }
+.chip-max { color: var(--max); background: color-mix(in srgb, var(--max) 14%, transparent); }
 .chip-web { color: var(--web); background: color-mix(in srgb, var(--web) 14%, transparent); }
 .chip-id { color: var(--hot); background: color-mix(in srgb, var(--hot) 14%, transparent); }
 .chip-type { color: var(--ink-2); background: var(--surface-2); }

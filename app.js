@@ -31,8 +31,10 @@ const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 const TYPE_LABEL = { country: "Country", subnational: "Sub-national", supranational: "Supranational", thematic: "Thematic", hub: "Network hub" };
 const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 const isTelegram = s => s.startsWith("Telegram:");
-const sourceLabel = s => isTelegram(s) ? s.slice(9).trim() : s;
-const sourceChip = s => isTelegram(s) ? `<span class="chip chip-tg">Telegram</span>` : `<span class="chip chip-web">Web</span>`;
+// MAX (VK's messenger) channels appear as "MAX <channel>" or as max.ru links.
+const isMax = s => s.startsWith("MAX") || s.includes("max.ru");
+const sourceLabel = s => isTelegram(s) ? s.slice(9).trim() : s.startsWith("MAX") ? s.replace(/^MAX:?\s*/, "") : s;
+const sourceChip = s => isTelegram(s) ? `<span class="chip chip-tg">Telegram</span>` : isMax(s) ? `<span class="chip chip-max">MAX</span>` : `<span class="chip chip-web">Web</span>`;
 
 function mergeCounts(lists, key, val = "count") {
 	const m = new Map();
@@ -721,7 +723,8 @@ const App = {
 		const host = $("#region");
 		const m = Analysis.momentum(d.articlesPerDay, Data.lastDate);
 		const surges = Analysis.surges(d.articlesPerDay);
-		const tgShare = d3.sum(d.topSources.filter(s => isTelegram(s.source)), s => s.count) / (d3.sum(d.topSources, s => s.count) || 1);
+		const shareOf = test => d3.sum(d.topSources.filter(s => test(s.source)), s => s.count) / (d3.sum(d.topSources, s => s.count) || 1);
+		const tgShare = shareOf(isTelegram), maxShare = shareOf(isMax);
 		const missing = r.domains.filter(x => !d.files.includes(x));
 		const parent = r.meta.parent ? Data.byIso.get(r.meta.parent) : null;
 		const arrow = m.change == null ? "flat" : m.change > 0.05 ? "up" : m.change < -0.05 ? "down" : "flat";
@@ -759,7 +762,7 @@ const App = {
 		</section>
 		<section class="sec">
 			<h3 class="sec-h">Who supplies the content</h3>
-			<p class="sec-sub">Top sources since the target's first article. ${pct(tgShare)} of the top-source volume comes from Telegram channels.</p>
+			<p class="sec-sub">Top sources since the target's first article. ${pct(tgShare)} of the top-source volume comes from Telegram channels${maxShare > 0 ? ` and ${pct(maxShare)} from MAX channels` : ""}.</p>
 			<div id="r-sources"></div>
 		</section>
 		<section class="sec">
@@ -842,7 +845,7 @@ const App = {
 		for (const x of rows) x.backfill = x.pub ? Math.abs(x.total / x.pub - 1) > 0.2 : true;
 		el.innerHTML = `<ol class="turnover">${rows.map(x => `
 			<li><span class="to-m">${monthLabel(x.m)}${Data.history.partialLast && x.m === months.at(-1) ? " <small>to date</small>" : ""}<small>${compact.format(x.total)} collected</small>${x.backfill ? `<small class="warn" title="Collected ${full.format(x.total)} articles but only ${full.format(x.pub)} are dated to this month: the month includes older, back-loaded articles.">Includes older articles</small>` : ""}</span>
-			<ol class="to-src">${x.sources.slice(0, 5).map(([s, c]) => `<li><span class="to-name">${esc(sourceLabel(s))}${isTelegram(s) ? `<span class="chip chip-tg">TG</span>` : ""}${x.fresh.has(s) ? `<span class="chip chip-new">New</span>` : ""}</span><span class="to-share">${pct(c / x.total)}</span></li>`).join("")}</ol></li>`).join("")}</ol>`;
+			<ol class="to-src">${x.sources.slice(0, 5).map(([s, c]) => `<li><span class="to-name">${esc(sourceLabel(s))}${isTelegram(s) ? `<span class="chip chip-tg">TG</span>` : isMax(s) ? `<span class="chip chip-max">MAX</span>` : ""}${x.fresh.has(s) ? `<span class="chip chip-new">New</span>` : ""}</span><span class="to-share">${pct(c / x.total)}</span></li>`).join("")}</ol></li>`).join("")}</ol>`;
 	},
 
 	categoryMix(hist) {
