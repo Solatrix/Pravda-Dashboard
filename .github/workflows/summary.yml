@@ -1,0 +1,34 @@
+# .github/workflows/summary.yml — per-target summary for the Atlas overview.
+# Reads the latest snapshot of CheckFirstHQ/pravda-network (read-only) and commits res/json/summary.json,
+# so visitors load ~80 KB instead of every domain file (~54 MB).
+name: Build target summary
+on:
+  schedule:
+    - cron: "10 7,19 * * *"   # twice daily, ~40 min after CheckFirst's updates (~06:30 and ~18:25 UTC)
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: data-commits-summary
+jobs:
+  summary:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out the latest snapshot of CheckFirst's json/ only
+        run: |
+          git clone --depth 1 --filter=blob:none --sparse https://github.com/CheckFirstHQ/pravda-network.git ../pravda-network
+          git -C ../pravda-network sparse-checkout set json
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python tools/build_summary.py ../pravda-network/json res/json/pravda-all-domains.json res/json/summary.json --sha "$(git -C ../pravda-network rev-parse HEAD)"
+      - name: Commit if changed
+        run: |
+          git config user.name "summary-bot"
+          git config user.email "summary-bot@users.noreply.github.com"
+          git add res/json/summary.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Update target summary"
+          git pull --rebase && git push

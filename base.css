@@ -143,7 +143,9 @@ svg text { fill: var(--ink-2); font: 10.5px var(--f-data); }
 
 /* growth */
 .growth-ctl { display: flex; gap: 10px; align-items: center; }
-.play { border: 1px solid var(--ink); background: var(--ink); color: var(--bg); border-radius: var(--r-sm); padding: 6px 12px; cursor: pointer; font-weight: 600; min-width: 64px; }
+.play { flex: none; display: grid; place-items: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 50%; background: var(--accent); color: var(--accent-ink); cursor: pointer; }
+.play:hover { filter: brightness(1.08); }
+.play svg { width: 16px; height: 16px; }
 .growth-ctl input { flex: 1; accent-color: var(--accent); min-width: 0; }
 .growth-read { margin: 6px 0 0; font-variant-numeric: tabular-nums; }
 .growth-read span { color: var(--ink-2); }

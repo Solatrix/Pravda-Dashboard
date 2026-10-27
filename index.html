@@ -1,76 +1,217 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-	<meta charset="UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Pravda Dashboard — Tracking Russia's Pravda Network</title>
-	<meta name="title" content="Pravda Dashboard — Tracking Russia's Pravda Network" />
-	<meta name="description" content="Discover the Pravda Dashboard World Map, an interactive application that tracks and visualizes the influence and reach of Russia's Pravda Network across more than 110 countries and regions worldwide. Dive in to explore the global footprint and impact of this extensive network" />
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Pravda Network Atlas</title>
+<script>
+// Apply a saved theme before first paint; without one the page follows the system setting.
+try { const t = localStorage.getItem("atlas-theme"); if (t === "light" || t === "dark") document.documentElement.dataset.theme = t; } catch { /* storage blocked */ }
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400..700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="./base.css">
+<link rel="apple-touch-icon" sizes="180x180" href="./res/img/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="./res/img/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="./res/img/favicon-16x16.png">
+<link rel="manifest" href="./res/img/site.webmanifest">
+<meta property="og:image" content="https://solatrix.github.io/Pravda-Dashboard/res/img/thumbnail.png">
+<meta property="twitter:image" content="https://solatrix.github.io/Pravda-Dashboard/res/img/thumbnail.png">
 
-	<!-- Open Graph / Facebook -->
-	<meta property="og:type" content="website" />
-	<meta property="og:url" content="solatrix.github.io/Pravda-Dashboard/" />
-	<meta property="og:title" content="Pravda Dashboard — Tracking Russia's Pravda Network" />
-	<meta property="og:description" content="Discover the Pravda Dashboard World Map, an interactive application that tracks and visualizes the influence and reach of Russia's Pravda Network across more than 110 countries and regions worldwide. Dive in to explore the global footprint and impact of this extensive network" />
-	<meta property="og:image" content="https://solatrix.github.io/Pravda-Dashboard/res/img/thumbnail.png" />
+<style>
+:root {
+	--bg: #eef3f1; --surface: #ffffff; --surface-2: #e4ece9; --ink: #1f2826; --ink-2: #5b6a66; --line: #d2dcd8;
+	--accent: #13805f; --accent-ink: #ffffff; --hot: #c2410c; --up: #b4231c; --down: #13805f; --warn: #a15c07;
+	--tg: #2a6fb0; --web: #7a4fa8; --pin: #0e5c49; --track: #e3ebe8; --bar: #1f9e76; --area: rgb(31 158 118 / .16);
+	--tip-bg: #1f2826; --tip-ink: #f1f6f4; --tip-muted: #a9b8b3;
+	--seq-0: #c9eedf; --seq-1: #3ed7a4; --seq-2: #0b4a3b;
+	--div-neg: #2a6fb0; --div-mid: #e9eeec; --div-pos: #c2410c;
+	--cat-1: #1f9e76; --cat-2: #2a6fb0; --cat-3: #c2410c; --cat-4: #7a4fa8; --cat-5: #b8860b; --cat-6: #c43c74; --cat-7: #3b8e99; --cat-8: #6b7a3a;
+	--globe-sea: #dfe9e6; --globe-land: #b3c2bd; --globe-stroke: rgba(255, 255, 255, .7);
+	--globe-select: #c2410c; --globe-atmo: #9fd9c4;
+	--f-display: "Instrument Sans", "Helvetica Neue", Arial, sans-serif; --f-body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+	--f-data: "JetBrains Mono", ui-monospace, Menlo, monospace; --r-sm: 6px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+	--bg: #111816; --surface: #172220; --surface-2: #1f2c29; --ink: #e3ece9; --ink-2: #93a6a0; --line: #2b3a36;
+	--accent: #3ed7a4; --accent-ink: #0b1f19; --hot: #f59e5b; --up: #f87b6f; --down: #3ed7a4; --warn: #e7b35a;
+	--tg: #6aaee8; --web: #b896e0; --pin: #3ed7a4; --track: #22302d; --bar: #3ed7a4; --area: rgb(62 215 164 / .14);
+	--tip-bg: #e9f1ee; --tip-ink: #13201c; --tip-muted: #4f625c;
+	--seq-0: #1e4a3e; --seq-1: #2fb98b; --seq-2: #c8f7e6;
+	--div-neg: #5aa2e6; --div-mid: #34433f; --div-pos: #f59e5b;
+	--cat-1: #3ed7a4; --cat-2: #6aaee8; --cat-3: #f59e5b; --cat-4: #b896e0; --cat-5: #e2c057; --cat-6: #ef7fae; --cat-7: #6fd0d8; --cat-8: #b0c27a;
+	--globe-sea: #16211f; --globe-land: #2e3c38; --globe-stroke: rgba(10, 18, 16, .8);
+	--globe-select: #f59e5b; --globe-atmo: #2a7a62; color-scheme: dark;
+} }
+:root[data-theme="dark"] {
+	--bg: #111816; --surface: #172220; --surface-2: #1f2c29; --ink: #e3ece9; --ink-2: #93a6a0; --line: #2b3a36;
+	--accent: #3ed7a4; --accent-ink: #0b1f19; --hot: #f59e5b; --up: #f87b6f; --down: #3ed7a4; --warn: #e7b35a;
+	--tg: #6aaee8; --web: #b896e0; --pin: #3ed7a4; --track: #22302d; --bar: #3ed7a4; --area: rgb(62 215 164 / .14);
+	--tip-bg: #e9f1ee; --tip-ink: #13201c; --tip-muted: #4f625c;
+	--seq-0: #1e4a3e; --seq-1: #2fb98b; --seq-2: #c8f7e6;
+	--div-neg: #5aa2e6; --div-mid: #34433f; --div-pos: #f59e5b;
+	--cat-1: #3ed7a4; --cat-2: #6aaee8; --cat-3: #f59e5b; --cat-4: #b896e0; --cat-5: #e2c057; --cat-6: #ef7fae; --cat-7: #6fd0d8; --cat-8: #b0c27a;
+	--globe-sea: #16211f; --globe-land: #2e3c38; --globe-stroke: rgba(10, 18, 16, .8);
+	--globe-select: #f59e5b; --globe-atmo: #2a7a62; color-scheme: dark;
+}
+body { display: flex; flex-direction: column; }
+.top { display: flex; align-items: center; gap: 20px; padding-block: 12px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); border-bottom: 1px solid var(--line); background: var(--surface); }
+.brand { display: flex; align-items: center; gap: 12px; font: 600 19px/1 var(--f-display); letter-spacing: -.01em; white-space: nowrap; }
+.brand b { color: var(--accent); font-weight: 650; }
+.brand i { width: 1px; height: 22px; background: var(--line); }
+.brand small { font: 500 10.5px var(--f-data); color: var(--ink-2); letter-spacing: .06em; text-transform: uppercase; }
+.top .search { flex: 1; max-width: 420px; margin-left: auto; }
+.theme-btn { flex: none; display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--ink-2); cursor: pointer; }
+.theme-btn:hover { color: var(--ink); }
+.theme-btn svg { width: 18px; height: 18px; }
+.app { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 460px); }
+.stage { position: relative; min-height: 0; overflow: hidden; background: radial-gradient(ellipse at 50% 45%, color-mix(in srgb, var(--surface) 70%, transparent), transparent 70%); }
+#globe { position: absolute; inset: 0; }
+.float { position: absolute; background: color-mix(in srgb, var(--surface) 90%, transparent); border: 1px solid var(--line); border-radius: 8px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.stage-legend { left: 20px; top: 18px; width: 260px; padding: 10px 12px; }
+.stage-month { left: 20px; right: 20px; bottom: 18px; max-width: 560px; padding: 12px 14px; }
+.stage-month h2 { font: 600 13px var(--f-display); margin-bottom: 8px; display: flex; justify-content: space-between; gap: 8px; }
+#month-status { font: 11px var(--f-data); color: var(--ink-2); font-weight: 400; }
+.mrow { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 12.5px; }
+.mrow label { color: var(--ink-2); }
+.mrow select { flex: 1; min-width: 0; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 5px 8px; }
+.growth-ctl input:disabled { opacity: .35; }
+.growth-steps span { cursor: default; }
+#status { position: absolute; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; font-size: 13px; background: var(--bg); }
+.panel { overflow-y: auto; border-left: 1px solid var(--line); background: var(--surface); padding-block: 22px 40px; padding-left: 22px; padding-right: max(22px, env(safe-area-inset-right, 0px)); }
+.overview, #region { display: grid; gap: 30px; }
+body[data-view="region"] .overview { display: none; }
+.ov-title { font: 650 24px/1.15 var(--f-display); letter-spacing: -.015em; }
+.ov-lede { margin: 6px 0 0; color: var(--ink-2); max-width: 52ch; }
+.kpis { border-block: 1px solid var(--line); padding-block: 14px; }
+.sec + .sec { border-top: 1px solid var(--line); padding-top: 22px; }
+.ranking-list { max-height: 380px; overflow-y: auto; padding-right: 6px; }
+.region-name { --name-size: 34px; letter-spacing: -.02em; }
 
-	<!-- Twitter -->
-	<meta property="twitter:card" content="summary_large_image" />
-	<meta property="twitter:url" content="solatrix.github.io/Pravda-Dashboard/" />
-	<meta property="twitter:title" content="Pravda Dashboard — Tracking Russia's Pravda Network" />
-	<meta property="twitter:description" content="Discover the Pravda Dashboard World Map, an interactive application that tracks and visualizes the influence and reach of Russia's Pravda Network across more than 110 countries and regions worldwide. Dive in to explore the global footprint and impact of this extensive network" />
-	<meta property="twitter:image" content="https://solatrix.github.io/Pravda-Dashboard/res/img/thumbnail.png" />
+/* new pieces */
+.legend-bar.is-rev { background: linear-gradient(90deg, var(--seq-0), var(--seq-1), var(--seq-2)); }
+.legend-bar.is-div { background: linear-gradient(90deg, var(--div-neg), var(--div-mid), var(--div-pos)); }
+.legend-ticks span:first-child { transform: none; }
+.legend-ticks span:last-child { transform: translateX(-100%); }
+.mv { font: 600 10.5px var(--f-data); margin-right: 6px; }
+.mv-up { color: var(--up); }
+.mv-down { color: var(--down); }
+.mbar { fill: var(--track); }
+.mbar { fill: color-mix(in srgb, var(--bar) 45%, var(--track)); }
+.mbar.is-sel { fill: var(--hot); }
+.mbar.is-partial { fill-opacity: .45; }
+.mbar:hover { fill: var(--bar); }
+.chip-new { color: var(--accent-ink); background: var(--accent); }
+.chip-add { color: var(--down); background: color-mix(in srgb, var(--down) 14%, transparent); margin: 0 4px 4px 0; display: inline-block; text-transform: none; }
+.chip-rem { color: var(--up); background: color-mix(in srgb, var(--up) 14%, transparent); margin: 0 4px 4px 0; display: inline-block; text-transform: none; }
+.latest, .archive-links { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.latest li, .archive-links li { display: grid; gap: 1px; }
+.latest a { color: var(--ink); text-decoration-color: var(--line); font-weight: 500; }
+.latest a:hover, .archive-links a:hover { color: var(--accent); }
+.archive-links li { grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; gap: 10px; }
+.archive-links a { font: 12.5px var(--f-data); overflow-wrap: anywhere; }
+.latest .muted, .archive-links .muted { font-size: 11.5px; }
+.turnover { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.turnover > li { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); gap: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--line); }
+.turnover > li:last-child { border-bottom: 0; padding-bottom: 0; }
+.to-m { font-weight: 600; display: grid; gap: 2px; align-content: start; font-size: 13px; }
+.to-m small { font-weight: 400; color: var(--ink-2); font-size: 11.5px; font-family: var(--f-data); }
+.to-m small.warn { color: var(--warn); font-family: var(--f-body); }
+.to-src { list-style: none; margin: 0; padding: 0; display: grid; gap: 3px; min-width: 0; }
+.to-src li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; font-size: 12.5px; }
+.to-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.to-share { font: 11.5px var(--f-data); color: var(--ink-2); }
+.mix { display: grid; gap: 4px; }
+.mix-row { display: grid; grid-template-columns: 4em minmax(0, 1fr); gap: 8px; align-items: center; }
+.mix-m { font: 11px var(--f-data); color: var(--ink-2); }
+.mix-bar { display: flex; height: 13px; border-radius: 2px; overflow: hidden; background: var(--track); }
+.mix-bar i { display: block; height: 100%; }
+.mix-key { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 8px 0 0; font-size: 11.5px; color: var(--ink-2); }
+.mix-key span { display: inline-flex; align-items: center; gap: 5px; }
+.mix-key i { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+.dom-changes { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.dom-changes li { display: grid; grid-template-columns: 7.5em minmax(0, 1fr); gap: 10px; align-items: start; }
+@media (max-width: 900px) {
+	html, body { height: auto; }
+	.top { flex-wrap: wrap; position: sticky; top: env(safe-area-inset-top, 0px); z-index: 30; }
+	body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 31; background: var(--surface); }
+	.top .search { max-width: none; flex-basis: 100%; order: 1; }
+	.theme-btn { margin-left: auto; }
+	.app { display: block; }
+	.stage { height: 68svh; min-height: 420px; }
+	.stage-legend { left: 12px; top: 10px; width: 210px; padding: 8px 10px; }
+	.stage-month { left: 12px; right: 12px; bottom: 10px; padding: 10px 12px; }
+	.stage-month .growth-steps { display: none; }
+	.panel { border-left: 0; border-top: 1px solid var(--line); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+	.turnover > li, .dom-changes li { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+}
+</style>
 
-	<link rel="apple-touch-icon" sizes="180x180" href="./res/img/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="./res/img/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="./res/img/favicon-16x16.png">
-	<link rel="manifest" href="./res/img/site.webmanifest">
-</head>
-<body>
-	<div id="background-map"></div>
-	<section class="logo">
-		<article class="logo-img">
-			<svg id="logotype" width="387" height="85" viewBox="0 0 387 85" fill="none" xmlns="http://www.w3.org/2000/svg">
-				<path
-					d="M0.48 57V28.2H13.4C15.5067 28.2 17.3067 28.56 18.8 29.28C20.32 30 21.48 31.0133 22.28 32.32C23.1067 33.6267 23.52 35.1733 23.52 36.96C23.52 38.72 23.1067 40.2667 22.28 41.6C21.4533 42.9333 20.2933 43.9733 18.8 44.72C17.3067 45.44 15.5067 45.8 13.4 45.8H4.52V41.72H13.16C14.8133 41.72 16.08 41.2933 16.96 40.44C17.8667 39.5867 18.32 38.4267 18.32 36.96C18.32 35.52 17.8667 34.3867 16.96 33.56C16.08 32.7333 14.8133 32.32 13.16 32.32H5.68V57H0.48ZM27.3597 57V36.6H32.2797V41.52H32.3997V57H27.3597ZM32.3997 46.36L31.8797 41.52C32.3597 39.7867 33.173 38.4667 34.3197 37.56C35.4664 36.6533 36.8397 36.2 38.4397 36.2C38.9997 36.2 39.3997 36.2533 39.6397 36.36V41.12C39.5064 41.0667 39.3197 41.04 39.0797 41.04C38.8397 41.0133 38.5464 41 38.1997 41C36.253 41 34.7997 41.4267 33.8397 42.28C32.8797 43.1333 32.3997 44.4933 32.3997 46.36ZM54.9625 57C54.8292 56.4667 54.7225 55.88 54.6425 55.24C54.5892 54.6 54.5625 53.8267 54.5625 52.92H54.4025V43.24C54.4025 42.1733 54.0958 41.3733 53.4825 40.84C52.8958 40.28 51.9892 40 50.7625 40C49.5625 40 48.6025 40.2267 47.8825 40.68C47.1892 41.1067 46.7625 41.7333 46.6025 42.56H41.7625C41.9758 40.6667 42.8825 39.1333 44.4825 37.96C46.0825 36.7867 48.2292 36.2 50.9225 36.2C53.7225 36.2 55.8425 36.84 57.2825 38.12C58.7225 39.3733 59.4425 41.2267 59.4425 43.68V52.92C59.4425 53.56 59.4825 54.2133 59.5625 54.88C59.6692 55.5467 59.8158 56.2533 60.0025 57H54.9625ZM47.8825 57.4C45.8292 57.4 44.1892 56.8933 42.9625 55.88C41.7625 54.84 41.1625 53.4533 41.1625 51.72C41.1625 49.8533 41.8425 48.3733 43.2025 47.28C44.5625 46.1867 46.4825 45.4533 48.9625 45.08L55.3225 44.12V47.32L49.8025 48.16C48.6025 48.3467 47.6958 48.68 47.0825 49.16C46.4958 49.64 46.2025 50.3067 46.2025 51.16C46.2025 51.9333 46.4825 52.5333 47.0425 52.96C47.6025 53.36 48.3758 53.56 49.3625 53.56C50.8025 53.56 52.0025 53.2 52.9625 52.48C53.9225 51.76 54.4025 50.88 54.4025 49.84L54.9625 52.92C54.4292 54.3867 53.5492 55.5067 52.3225 56.28C51.1225 57.0267 49.6425 57.4 47.8825 57.4ZM69.0553 57L60.8953 36.6H66.3353L72.8553 55.36H70.1753L76.6953 36.6H81.9753L73.7753 57H69.0553ZM98.8338 57V52.4L99.2338 52.48C98.8871 53.9733 98.0471 55.1733 96.7138 56.08C95.3804 56.96 93.7938 57.4 91.9538 57.4C90.0871 57.4 88.4604 56.9733 87.0738 56.12C85.7138 55.24 84.6604 54.0133 83.9138 52.44C83.1671 50.8667 82.7938 49.0133 82.7938 46.88C82.7938 44.72 83.1804 42.84 83.9538 41.24C84.7271 39.64 85.8071 38.4 87.1938 37.52C88.6071 36.64 90.2471 36.2 92.1138 36.2C94.0338 36.2 95.6204 36.6667 96.8738 37.6C98.1271 38.5067 98.9004 39.7733 99.1938 41.4L98.6738 41.44V28.2H103.754V57H98.8338ZM93.4338 53.28C95.0604 53.28 96.3538 52.72 97.3138 51.6C98.3004 50.4533 98.7938 48.8533 98.7938 46.8C98.7938 44.7467 98.3004 43.16 97.3138 42.04C96.3271 40.92 95.0204 40.36 93.3938 40.36C91.7938 40.36 90.5004 40.9333 89.5138 42.08C88.5271 43.2 88.0338 44.7867 88.0338 46.84C88.0338 48.8933 88.5271 50.48 89.5138 51.6C90.5004 52.72 91.8071 53.28 93.4338 53.28ZM121.838 57C121.704 56.4667 121.598 55.88 121.518 55.24C121.464 54.6 121.438 53.8267 121.438 52.92H121.278V43.24C121.278 42.1733 120.971 41.3733 120.358 40.84C119.771 40.28 118.864 40 117.638 40C116.438 40 115.478 40.2267 114.758 40.68C114.064 41.1067 113.638 41.7333 113.478 42.56H108.638C108.851 40.6667 109.758 39.1333 111.358 37.96C112.958 36.7867 115.104 36.2 117.798 36.2C120.598 36.2 122.718 36.84 124.158 38.12C125.598 39.3733 126.318 41.2267 126.318 43.68V52.92C126.318 53.56 126.358 54.2133 126.438 54.88C126.544 55.5467 126.691 56.2533 126.878 57H121.838ZM114.758 57.4C112.704 57.4 111.064 56.8933 109.838 55.88C108.638 54.84 108.038 53.4533 108.038 51.72C108.038 49.8533 108.718 48.3733 110.078 47.28C111.438 46.1867 113.358 45.4533 115.838 45.08L122.198 44.12V47.32L116.678 48.16C115.478 48.3467 114.571 48.68 113.958 49.16C113.371 49.64 113.078 50.3067 113.078 51.16C113.078 51.9333 113.358 52.5333 113.918 52.96C114.478 53.36 115.251 53.56 116.238 53.56C117.678 53.56 118.878 53.2 119.838 52.48C120.798 51.76 121.278 50.88 121.278 49.84L121.838 52.92C121.304 54.3867 120.424 55.5067 119.198 56.28C117.998 57.0267 116.518 57.4 114.758 57.4Z"
-					fill="#3ED7A4" />
-				<path
-					d="M187.64 57V52.84H195.08C197.267 52.84 199.133 52.4 200.68 51.52C202.227 50.64 203.4 49.4133 204.2 47.84C205.027 46.2667 205.44 44.4667 205.44 42.44C205.44 40.44 205.027 38.68 204.2 37.16C203.4 35.64 202.227 34.4667 200.68 33.64C199.16 32.7867 197.293 32.36 195.08 32.36H187.72V28.2H195.08C198.227 28.2 200.973 28.7867 203.32 29.96C205.667 31.1333 207.48 32.8 208.76 34.96C210.067 37.0933 210.72 39.6133 210.72 42.52C210.72 45.4267 210.067 47.9733 208.76 50.16C207.453 52.32 205.627 54 203.28 55.2C200.96 56.4 198.24 57 195.12 57H187.64ZM184.48 57V28.2H189.68V57H184.48ZM227.127 57C226.993 56.4667 226.887 55.88 226.807 55.24C226.753 54.6 226.727 53.8267 226.727 52.92H226.567V43.24C226.567 42.1733 226.26 41.3733 225.647 40.84C225.06 40.28 224.153 40 222.927 40C221.727 40 220.767 40.2267 220.047 40.68C219.353 41.1067 218.927 41.7333 218.767 42.56H213.927C214.14 40.6667 215.047 39.1333 216.647 37.96C218.247 36.7867 220.393 36.2 223.087 36.2C225.887 36.2 228.007 36.84 229.447 38.12C230.887 39.3733 231.607 41.2267 231.607 43.68V52.92C231.607 53.56 231.647 54.2133 231.727 54.88C231.833 55.5467 231.98 56.2533 232.167 57H227.127ZM220.047 57.4C217.993 57.4 216.353 56.8933 215.127 55.88C213.927 54.84 213.327 53.4533 213.327 51.72C213.327 49.8533 214.007 48.3733 215.367 47.28C216.727 46.1867 218.647 45.4533 221.127 45.08L227.487 44.12V47.32L221.967 48.16C220.767 48.3467 219.86 48.68 219.247 49.16C218.66 49.64 218.367 50.3067 218.367 51.16C218.367 51.9333 218.647 52.5333 219.207 52.96C219.767 53.36 220.54 53.56 221.527 53.56C222.967 53.56 224.167 53.2 225.127 52.48C226.087 51.76 226.567 50.88 226.567 49.84L227.127 52.92C226.593 54.3867 225.713 55.5067 224.487 56.28C223.287 57.0267 221.807 57.4 220.047 57.4ZM244.121 57.4C241.294 57.4 239.041 56.8133 237.361 55.64C235.681 54.44 234.761 52.7867 234.601 50.68H239.201C239.334 51.72 239.827 52.5067 240.681 53.04C241.534 53.5733 242.681 53.84 244.121 53.84C245.427 53.84 246.401 53.64 247.041 53.24C247.707 52.8133 248.041 52.2133 248.041 51.44C248.041 50.88 247.854 50.4267 247.481 50.08C247.107 49.7067 246.401 49.4 245.361 49.16L242.081 48.4C239.841 47.92 238.174 47.1733 237.081 46.16C236.014 45.12 235.481 43.8267 235.481 42.28C235.481 40.3867 236.201 38.9067 237.641 37.84C239.107 36.7467 241.121 36.2 243.681 36.2C246.214 36.2 248.241 36.7467 249.761 37.84C251.307 38.9067 252.161 40.3867 252.321 42.28H247.721C247.587 41.4533 247.161 40.8267 246.441 40.4C245.747 39.9733 244.787 39.76 243.561 39.76C242.414 39.76 241.547 39.9467 240.961 40.32C240.374 40.6667 240.081 41.1867 240.081 41.88C240.081 42.4133 240.307 42.8667 240.761 43.24C241.214 43.5867 241.974 43.8933 243.041 44.16L246.561 44.96C248.561 45.4133 250.067 46.2 251.081 47.32C252.121 48.44 252.641 49.76 252.641 51.28C252.641 53.2267 251.894 54.7333 250.401 55.8C248.907 56.8667 246.814 57.4 244.121 57.4ZM256.086 57V28.2H261.126V57H256.086ZM270.406 57V44.12C270.406 42.8667 270.086 41.92 269.446 41.28C268.806 40.64 267.873 40.32 266.646 40.32C265.58 40.32 264.62 40.56 263.766 41.04C262.94 41.52 262.286 42.1867 261.806 43.04C261.353 43.8933 261.126 44.88 261.126 46L260.606 41.12C261.3 39.6267 262.313 38.44 263.646 37.56C264.98 36.6533 266.58 36.2 268.446 36.2C270.66 36.2 272.38 36.8267 273.606 38.08C274.86 39.3333 275.486 41 275.486 43.08V57H270.406ZM292.218 57.4C290.272 57.4 288.672 56.9467 287.418 56.04C286.192 55.1067 285.432 53.8267 285.138 52.2L285.498 52.16V57H280.578V28.2H285.618V41.2L285.258 41.12C285.605 39.6 286.418 38.4 287.698 37.52C289.005 36.64 290.618 36.2 292.538 36.2C294.352 36.2 295.925 36.64 297.258 37.52C298.618 38.3733 299.672 39.5867 300.418 41.16C301.165 42.7333 301.538 44.5867 301.538 46.72C301.538 48.88 301.152 50.76 300.378 52.36C299.605 53.96 298.525 55.2 297.138 56.08C295.752 56.96 294.112 57.4 292.218 57.4ZM290.938 53.24C292.565 53.24 293.858 52.68 294.818 51.56C295.778 50.4133 296.258 48.8133 296.258 46.76C296.258 44.7067 295.765 43.12 294.778 42C293.818 40.88 292.525 40.32 290.898 40.32C289.298 40.32 288.005 40.8933 287.018 42.04C286.032 43.16 285.538 44.7467 285.538 46.8C285.538 48.8533 286.032 50.44 287.018 51.56C288.005 52.68 289.312 53.24 290.938 53.24ZM314.976 57.4C312.816 57.4 310.909 56.9467 309.256 56.04C307.629 55.1333 306.362 53.88 305.456 52.28C304.549 50.6533 304.096 48.8 304.096 46.72C304.096 44.64 304.549 42.8133 305.456 41.24C306.362 39.6667 307.629 38.44 309.256 37.56C310.909 36.6533 312.816 36.2 314.976 36.2C317.162 36.2 319.069 36.6533 320.696 37.56C322.322 38.44 323.589 39.6667 324.496 41.24C325.402 42.8133 325.856 44.64 325.856 46.72C325.856 48.8 325.389 50.6533 324.456 52.28C323.549 53.88 322.282 55.1333 320.656 56.04C319.029 56.9467 317.136 57.4 314.976 57.4ZM314.976 53.36C316.042 53.36 317.002 53.0933 317.856 52.56C318.709 52 319.376 51.2267 319.856 50.24C320.336 49.2267 320.576 48.04 320.576 46.68C320.576 44.68 320.042 43.1067 318.976 41.96C317.936 40.8133 316.602 40.24 314.976 40.24C313.349 40.24 312.002 40.8133 310.936 41.96C309.869 43.1067 309.336 44.68 309.336 46.68C309.336 48.04 309.576 49.2267 310.056 50.24C310.562 51.2267 311.229 52 312.056 52.56C312.909 53.0933 313.882 53.36 314.976 53.36ZM342.205 57C342.071 56.4667 341.965 55.88 341.885 55.24C341.831 54.6 341.805 53.8267 341.805 52.92H341.645V43.24C341.645 42.1733 341.338 41.3733 340.725 40.84C340.138 40.28 339.231 40 338.005 40C336.805 40 335.845 40.2267 335.125 40.68C334.431 41.1067 334.005 41.7333 333.845 42.56H329.005C329.218 40.6667 330.125 39.1333 331.725 37.96C333.325 36.7867 335.471 36.2 338.165 36.2C340.965 36.2 343.085 36.84 344.525 38.12C345.965 39.3733 346.685 41.2267 346.685 43.68V52.92C346.685 53.56 346.725 54.2133 346.805 54.88C346.911 55.5467 347.058 56.2533 347.245 57H342.205ZM335.125 57.4C333.071 57.4 331.431 56.8933 330.205 55.88C329.005 54.84 328.405 53.4533 328.405 51.72C328.405 49.8533 329.085 48.3733 330.445 47.28C331.805 46.1867 333.725 45.4533 336.205 45.08L342.565 44.12V47.32L337.045 48.16C335.845 48.3467 334.938 48.68 334.325 49.16C333.738 49.64 333.445 50.3067 333.445 51.16C333.445 51.9333 333.725 52.5333 334.285 52.96C334.845 53.36 335.618 53.56 336.605 53.56C338.045 53.56 339.245 53.2 340.205 52.48C341.165 51.76 341.645 50.88 341.645 49.84L342.205 52.92C341.671 54.3867 340.791 55.5067 339.565 56.28C338.365 57.0267 336.885 57.4 335.125 57.4ZM351.789 57V36.6H356.709V41.52H356.829V57H351.789ZM356.829 46.36L356.309 41.52C356.789 39.7867 357.603 38.4667 358.749 37.56C359.896 36.6533 361.269 36.2 362.869 36.2C363.429 36.2 363.829 36.2533 364.069 36.36V41.12C363.936 41.0667 363.749 41.04 363.509 41.04C363.269 41.0133 362.976 41 362.629 41C360.683 41 359.229 41.4267 358.269 42.28C357.309 43.1333 356.829 44.4933 356.829 46.36ZM381.467 57V52.4L381.867 52.48C381.52 53.9733 380.68 55.1733 379.347 56.08C378.013 56.96 376.427 57.4 374.587 57.4C372.72 57.4 371.093 56.9733 369.707 56.12C368.347 55.24 367.293 54.0133 366.547 52.44C365.8 50.8667 365.427 49.0133 365.427 46.88C365.427 44.72 365.813 42.84 366.587 41.24C367.36 39.64 368.44 38.4 369.827 37.52C371.24 36.64 372.88 36.2 374.747 36.2C376.667 36.2 378.253 36.6667 379.507 37.6C380.76 38.5067 381.533 39.7733 381.827 41.4L381.307 41.44V28.2H386.387V57H381.467ZM376.067 53.28C377.693 53.28 378.987 52.72 379.947 51.6C380.933 50.4533 381.427 48.8533 381.427 46.8C381.427 44.7467 380.933 43.16 379.947 42.04C378.96 40.92 377.653 40.36 376.027 40.36C374.427 40.36 373.133 40.9333 372.147 42.08C371.16 43.2 370.667 44.7867 370.667 46.84C370.667 48.8933 371.16 50.48 372.147 51.6C373.133 52.72 374.44 53.28 376.067 53.28Z"
-					fill="#282F2E" />
-				<line x1="156.5" y1="2.18557e-08" x2="156.5" y2="85" stroke="white" strokeWidth="2" />
-			</svg>
-		</article>
-		<section class="search-bar">
-			<input type="text" class="type" placeholder="Look up a country or a region" id="search-input"/>
-		</section>
-		
-	</section>
-	<div class="tooltip hidden"></div>
-	<div class="loader_container">
-		<div class="merge"></div>
+<header class="top">
+	<div class="brand"><span><b>Pravda</b></span><i></i><span>Dashboard</span><small>Network atlas</small></div>
+	<div class="search">
+		<input id="search" type="search" role="combobox" aria-autocomplete="list" aria-controls="search-list" aria-expanded="false" placeholder="Find a country, region or domain" autocomplete="off">
+		<ul id="search-list" role="listbox" aria-label="Matching targets" hidden></ul>
 	</div>
+	<button type="button" class="theme-btn" id="theme-btn" aria-label="Theme"></button>
+</header>
 
-	<!-- Fonts -->
-	<link rel="preconnect" href="https://fonts.googleapis.com">
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-	<link
-		href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap"
-		rel="stylesheet">
-	
-	<!-- Stylesheets -->
-	<link rel="stylesheet" href="css/world-map.css">
-	<!-- Leaflet JS -->
-	<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-	<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<main class="app">
+	<section class="stage" aria-label="Globe of targeted countries">
+		<div id="globe"></div>
+		<div id="status">
+			<div class="ld">
+				<p class="ld-title">Loading the Pravda network <span id="ld-pct">0%</span></p>
+				<div class="ld-bar" id="ld-bar" role="progressbar" aria-label="Loading the Pravda network" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="ld-fill"></i></div>
+				<p class="ld-caption" id="ld-caption">Libraries</p>
+				<div class="ld-errors" id="ld-errors" aria-live="assertive"></div>
+			</div>
+		</div>
+		<div class="float stage-legend" id="legend"></div>
+		<div class="float stage-month"><h2>Month <span id="month-status"></span></h2><div id="monthly"></div></div>
+	</section>
 
-	<!-- Plotly.js -->
-	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	<aside class="panel" id="panel">
+		<div id="region" hidden></div>
+		<div class="overview">
+			<div>
+				<h1 class="ov-title">The Pravda network at a glance</h1>
+				<p class="ov-lede">Automated sites republishing Russian state media and Telegram content, mapped by the country, region or theme each one targets. Select a target on the globe or in the list, or step through the months below the globe.</p>
+			</div>
+			<div class="kpis" id="kpis"></div>
+			<section class="sec"><h2 class="sec-h" id="ranking-title">Targets ranked</h2><div id="ranking"></div></section>
+			<section class="sec"><h2 class="sec-h">Network output per day</h2><p class="sec-sub">All domains combined. Numbered dots mark the largest surges.</p><div id="net-timeline" class="chart"></div></section>
+			<section class="sec"><h2 class="sec-h">Momentum</h2><p class="sec-sub">Daily average over the last 30 days compared with the 90 days before, for targets publishing at least five articles a day.</p><div id="rising" class="chart"></div></section>
+			<section class="sec"><h2 class="sec-h">Domains joining and leaving</h2><div id="net-history"></div></section>
+			<div class="sec-pair">
+				<section class="sec"><h2 class="sec-h">Hour of publication</h2><div id="net-hours"></div></section>
+				<section class="sec"><h2 class="sec-h">Day of week</h2><div id="rhythm"></div></section>
+			</div>
+			<p class="note">Data: CheckFirst, Pravda Network Data Collection (snapshot), and its git history for month-by-month sources. Map shapes: Natural Earth via world-atlas. By Valentin Châtelet.</p>
+		</div>
+	</aside>
+</main>
+<div id="tooltip" hidden></div>
 
-	<!-- D3.js -->
-	<script src="https://unpkg.com/d3@5.7.0/dist/d3.min.js"></script>
-	<script src="js/world-map.js" type="module"></script>
-	<script src="js/slideshow.js" type="text/javascript"></script>
-
-
-</body>
+<script>
+// Libraries fill the first 10% of the loader bar as they arrive; app.js takes over once it runs.
+const libs = { got: 0, $: id => document.getElementById(id) };
+libs.ok = () => {
+	const p = Math.round(++libs.got / 3 * 10) + "%";
+	libs.$("ld-fill").style.width = libs.$("ld-pct").textContent = p;
+	libs.$("ld-caption").textContent = `Libraries · ${libs.got} of 3`;
+};
+libs.fail = name => { document.body.dataset.state = "error"; libs.$("ld-errors").innerHTML = `<p class="ld-err">${name} did not load <button type="button" onclick="location.reload()">Retry</button></p>`; };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js" onload="libs.ok('d3')" onerror="libs.fail('d3')"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js" onload="libs.ok('topojson')" onerror="libs.fail('topojson')"></script>
+<script src="https://cdn.jsdelivr.net/npm/globe.gl@2.46.2/dist/globe.gl.min.js" onload="libs.ok('globe.gl')" onerror="libs.fail('globe.gl')"></script>
+<script src="./app.js"></script>
+<script>
+PravdaAtlas.start({
+	resBase: "./res/json/",
+	feedBase: "https://raw.githubusercontent.com/CheckFirstHQ/pravda-network/refs/heads/main/json/",
+	onRegion() { if (innerWidth <= 900) document.getElementById("panel").scrollIntoView({ behavior: "smooth" }); },
+});
+</script>
 </html>

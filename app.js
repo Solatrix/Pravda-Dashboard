@@ -56,9 +56,10 @@ async function fetchJSON(url, onBytes) {
 }
 const kb = n => n < 1e6 ? `${Math.max(1, Math.round(n / 1e3))} KB` : `${(n / 1e6).toFixed(1)} MB`;
 
-// One bar for the whole load. Each step owns a fixed share of 100 (libraries 10, data files 5 each,
-// globe 10, target files 50) and fills within it, so the bar never moves backwards.
+// One bar for the whole load. Each step owns a fixed share of 100 (libraries 10, data files 10 each,
+// globe 20) and fills within it. Without summary.json the target files are added as a second 100.
 const Loader = {
+	total: 100,
 	steps: [{ name: "Libraries", weight: 10, frac: 1, state: "done" }],
 	add(name, weight, detail = "") { const s = { name, weight, detail, frac: 0, state: "run" }; this.steps.push(s); return this.set(s); },
 	set(s, { state, detail, frac } = {}) {
@@ -71,7 +72,7 @@ const Loader = {
 		return s;
 	},
 	render() {
-		const p = Math.min(1, d3.sum(this.steps, s => s.weight * s.frac) / 100);
+		const p = Math.min(1, d3.sum(this.steps, s => s.weight * s.frac) / this.total);
 		$("#ld-fill").style.width = $("#ld-pct").textContent = pct(p);
 		$("#ld-bar").setAttribute("aria-valuenow", Math.round(p * 100));
 		const s = this.current?.state === "run" ? this.current : this.steps.findLast(x => x.state === "run");
@@ -92,7 +93,7 @@ const Loader = {
 	},
 	// A required file retries until it loads; an optional one is skipped and resolves null.
 	async load(name, url, { optional = false } = {}) {
-		const s = this.add(name, 5);
+		const s = this.add(name, 10);
 		for (;;) {
 			let n = 0;
 			try {
@@ -107,19 +108,46 @@ const Loader = {
 	},
 };
 
+/* ---------- theme: Light → Dark → System, remembered per browser ---------- */
+const Theme = {
+	modes: ["light", "dark", "system"],
+	icons: {
+		light: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/></svg>`,
+		dark: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 1 1 9.8 3.5a6.8 6.8 0 0 0 10.7 10.7z"/></svg>`,
+		system: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor" stroke="none"/></svg>`,
+	},
+	mode: () => document.documentElement.dataset.theme || "system",
+	next(m) { return this.modes[(this.modes.indexOf(m) + 1) % this.modes.length]; },
+	set(m) {
+		if (m === "system") delete document.documentElement.dataset.theme;
+		else document.documentElement.dataset.theme = m;
+		try { m === "system" ? localStorage.removeItem("atlas-theme") : localStorage.setItem("atlas-theme", m); } catch { /* storage blocked */ }
+	},
+	init() {
+		const btn = $("#theme-btn"); if (!btn) return;
+		const show = () => {
+			const m = this.mode(), label = `Theme: ${m}. Switch to ${this.next(m)}`;
+			btn.innerHTML = this.icons[m]; btn.title = label; btn.setAttribute("aria-label", label);
+		};
+		btn.addEventListener("click", () => { this.set(this.next(this.mode())); show(); });
+		show();
+	},
+};
+
 /* ---------- data ---------- */
 const Data = {
 	async init(cfg) {
 		this.cfg = cfg;
-		const [mapping, network, infoDefense, topo, history, headlines] = await Promise.all([
+		const [mapping, network, infoDefense, topo, history, headlines, summary] = await Promise.all([
 			Loader.load("Domain mapping", cfg.resBase + "pravda-all-domains.json"),
 			Loader.load("Network totals", cfg.feedBase + "a.network.news-pravda.com_viz.json"),
 			Loader.load("InfoDefense list", cfg.resBase + "info-defense-dataset.json"),
 			Loader.load("Map shapes", cfg.resBase + "countries-50m.json"),
 			Loader.load("Monthly history", cfg.resBase + "history.json", { optional: true }),
 			Loader.load("Headlines", cfg.resBase + "headlines.json", { optional: true }),
+			Loader.load("Target summary", cfg.resBase + "summary.json", { optional: true }),
 		]);
-		Object.assign(this, { mapping, network, topo, history, headlines });
+		Object.assign(this, { mapping, network, topo, history, headlines, summary });
 		this.infoDefense = new Set(Object.values(infoDefense));
 		this.cache = new Map();
 		this.failed = new Set();
@@ -135,7 +163,25 @@ const Data = {
 		this.regions.forEach((r, i) => r.rank = i + 1);
 		this.bySlug = new Map(this.regions.map(r => [r.slug, r]));
 		this.byIso = new Map(this.regions.filter(r => r.meta.iso).map(r => [r.meta.iso, r]));
+		if (summary) this.useSummary(summary);
 		return this;
+	},
+
+	/* Monthly totals, recent days and twins for every target from summary.json (built by a workflow),
+	   so the overview needs none of the per-domain files. Targets missing from it fall back to their files. */
+	useSummary(summary) {
+		const end = parseDate(summary.lastDate);
+		const dates = d3.range(summary.recentDays).map(i => d3.utcFormat("%Y-%m-%d")(d3.utcDay.offset(end, i - summary.recentDays + 1)));
+		const byName = new Map(this.regions.map(r => [r.name, r]));
+		for (const r of this.regions) {
+			const s = summary.regions[r.name]; if (!s) continue;
+			r.monthly = new Map(Object.entries(s.monthly));
+			r.firstDay = s.firstDay;
+			r.recent = s.recent.map((count, i) => ({ date: dates[i], count }));
+			r.twins = s.twins.filter(([n]) => byName.has(n)).map(([n, score]) => ({ o: byName.get(n), s: score }));
+		}
+		this.recentEnd = summary.lastDate;
+		this.missing = this.regions.filter(r => !r.monthly);
 	},
 
 	domainFile(domain) {
@@ -168,6 +214,7 @@ const Data = {
 			alternates: { share: total ? withAlt / total : 0, avg: withAlt ? altSum / withAlt : 0 },
 			firstDay: days.find(d => d.count > 0)?.date,
 		};
+		if (!r.monthly) Object.assign(r, { monthly: r.data.monthly, firstDay: r.data.firstDay, recent: days });
 		return r.data;
 	},
 
@@ -178,17 +225,17 @@ const Data = {
 		this.failed.clear();
 	},
 
-	async allRegions(onProgress) {
+	async allRegions(onProgress, list = this.regions) {
 		let done = 0;
-		const queue = [...this.regions];
-		const worker = async () => { while (queue.length) { const r = queue.shift(); await this.region(r); onProgress?.(++done, this.regions.length); } };
+		const queue = [...list];
+		const worker = async () => { while (queue.length) { const r = queue.shift(); await this.region(r); onProgress?.(++done, list.length); } };
 		await Promise.all(Array.from({ length: 6 }, worker));
 		this.buildMonths();
 	},
 
 	/* Monthly totals, ranks and month-on-month change for every target. */
 	buildMonths() {
-		const first = d3.min(this.regions, r => r.data.firstDay) || this.network.articlesPerDay[0].date;
+		const first = d3.min(this.regions, r => r.firstDay) || this.network.articlesPerDay[0].date;
 		this.months = d3.utcMonth.range(d3.utcMonth.floor(parseDate(first)), d3.utcMonth.offset(d3.utcMonth.floor(parseDate(this.lastDate)), 1))
 			.map(d3.utcFormat("%Y-%m"));
 		const lastDay = parseDate(this.lastDate);
@@ -196,7 +243,7 @@ const Data = {
 		this.monthStats = new Map();
 		this.months.forEach((m, i) => {
 			const prev = this.months[i - 1];
-			const rows = this.regions.map(r => ({ r, v: r.data.monthly.get(m) || 0, pv: prev ? r.data.monthly.get(prev) || 0 : 0 }))
+			const rows = this.regions.filter(r => r.monthly).map(r => ({ r, v: r.monthly.get(m) || 0, pv: prev ? r.monthly.get(prev) || 0 : 0 }))
 				.filter(x => x.v > 0).sort((a, b) => b.v - a.v);
 			const stats = new Map();
 			rows.forEach((x, k) => stats.set(x.r, { v: x.v, rank: k + 1, prev: x.pv, change: x.pv ? x.v / x.pv - 1 : null }));
@@ -514,9 +561,10 @@ const App = {
 	async start(cfg) {
 		this.cfg = cfg;
 		document.body.dataset.state = "loading";
+		Theme.init();
 		Loader.render();
 		await Data.init(cfg);
-		const draw = Loader.add("Drawing the globe", 10);
+		const draw = Loader.add("Drawing the globe", 20);
 		Map3D.init($("#globe"), this);
 		Map3D.drawn.then(() => Loader.set(draw, { state: "done" }));
 		this.kpis(); this.legend(); this.search(); this.ranking(); this.rhythm(); this.networkHistory();
@@ -532,21 +580,24 @@ const App = {
 		}).observe(document.body);
 	},
 
+	// With summary.json nothing is fetched here (bar the odd target it lacks); without it, every target's files.
 	async loadAll() {
-		const n = Data.regions.length;
+		const list = Data.summary ? Data.missing : Data.regions, n = list.length;
 		let done = 0, bytes = 0;
-		const step = Loader.add("Target files", 50);
+		if (n && !Data.summary) Loader.total += 100;
+		const step = n ? Loader.add("Target files", Data.summary ? 0 : 100) : null;
 		const show = () => Loader.set(step, { detail: `${done} of ${n} · ${kb(bytes)}`, frac: done / n });
 		Data.onBytes = b => { bytes += b; show(); };
 		for (;;) {
-			await Data.allRegions(d => { done = d; show(); });
+			if (!n) { Data.buildMonths(); break; }
+			await Data.allRegions(d => { done = d; show(); }, list);
 			if (!Data.failed.size) break;
 			const choice = await Loader.fail(step, `${Data.failed.size} file${Data.failed.size > 1 ? "s" : ""} failed`, ["Retry", "Continue without them"]);
 			if (choice !== "Retry") break;
 			Data.resetFailed();
 		}
 		Data.onBytes = null;
-		Loader.set(step, { state: "done" });
+		if (step) Loader.set(step, { state: "done" });
 		this.allLoaded = true;
 		document.body.dataset.deep = "ready";
 		const def = Data.partialMonth ? Data.months.at(-2) : Data.months.at(-1);
@@ -570,7 +621,7 @@ const App = {
 				</select>
 			</div>
 			<div class="growth-ctl">
-				<button type="button" class="play" id="m-play" aria-label="Play month by month">Play</button>
+				<button type="button" class="play" id="m-play"></button>
 				<input type="range" id="m-range" min="0" max="${months.length - 1}" value="${months.indexOf(defaultMonth)}" aria-label="Month">
 			</div>
 			<p class="growth-read"><b id="m-date"></b> <span id="m-sum"></span></p>
@@ -586,14 +637,28 @@ const App = {
 		sel.addEventListener("change", apply);
 		range.addEventListener("input", () => { stop(); apply(); });
 		let timer = null;
-		const stop = () => { clearInterval(timer); timer = null; this.playing = false; play.textContent = "Play"; };
+		const icons = {
+			play: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>`,
+			pause: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></svg>`,
+		};
+		const showPlay = on => {
+			play.innerHTML = on ? icons.pause : icons.play;
+			play.setAttribute("aria-label", on ? "Pause" : "Play month by month");
+			play.setAttribute("aria-pressed", on);
+		};
+		const stop = () => { clearInterval(timer); timer = null; this.playing = false; showPlay(false); };
+		// Plays once to the last month, holds it for one step, then rewinds to the first month and stops.
 		play.addEventListener("click", () => {
 			if (timer) return stop();
 			if (sel.value === "total") sel.value = "rank";
 			let i = +range.value >= months.length - 1 ? 0 : +range.value;
-			this.playing = true; play.textContent = "Pause"; Map3D.stopRotate();
-			timer = setInterval(() => { range.value = i; apply(); if (++i >= months.length) stop(); }, reduceMotion ? 150 : 650);
+			this.playing = true; showPlay(true); Map3D.stopRotate();
+			timer = setInterval(() => {
+				if (i < months.length) { range.value = i++; apply(); return; }
+				range.value = 0; apply(); stop();
+			}, reduceMotion ? 150 : 650);
 		});
+		showPlay(false);
 		this.monthControls = { sel, range };
 		apply();
 	},
@@ -784,7 +849,8 @@ const App = {
 		const el = $("#r-mix"); if (!el) return;
 		const months = Data.history.months;
 		const idx = months.map((m, i) => i).filter(i => hist.total[i] > 0).slice(-12);
-		const allCats = [...new Set(Data.regions.flatMap(r => r.data?.categories.map(c => c.category) || []))].sort();
+		// Every category in the history file, so a category keeps its colour whichever targets are loaded.
+		const allCats = [...new Set(Object.values(Data.history.regions).flatMap(h => h.categories.flatMap(Object.keys)))].sort();
 		const color = c => `var(--cat-${(allCats.indexOf(c) % 8) + 1})`;
 		Charts.mix(el, idx.map(i => months[i]), idx.map(i => hist.categories[i]), color);
 	},
@@ -792,7 +858,7 @@ const App = {
 	twins(r) {
 		const el = $("#r-twins"); if (!el || !r.data) return;
 		const v = Analysis.vector(r.data);
-		const list = Data.regions.filter(o => o !== r && o.data).map(o => ({ o, s: Analysis.cosine(v, Analysis.vector(o.data)) })).sort((a, b) => b.s - a.s).slice(0, 5);
+		const list = r.twins || Data.regions.filter(o => o !== r && o.data).map(o => ({ o, s: Analysis.cosine(v, Analysis.vector(o.data)) })).filter(t => t.s > 0).sort((a, b) => b.s - a.s).slice(0, 5);
 		el.innerHTML = `<ol class="twins">${list.map(t => `<li><a href="#${t.o.slug}">${esc(t.o.label)}</a><span class="twin-bar"><span style="width:${(t.s * 100).toFixed(1)}%"></span></span><span class="twin-v">${(t.s * 100).toFixed(0)}</span></li>`).join("")}</ol>`;
 	},
 
@@ -906,11 +972,11 @@ const App = {
 
 	rising() {
 		const el = $("#rising"); if (!el) return;
-		const rows = Data.regions.filter(r => r.data).map(r => ({ r, ...Analysis.momentum(r.data.articlesPerDay, Data.lastDate) })).filter(x => x.before >= 5 && x.change != null);
+		const rows = Data.regions.filter(r => r.recent).map(r => ({ r, ...Analysis.momentum(r.recent, Data.recentEnd || Data.lastDate) })).filter(x => x.before >= 5 && x.change != null);
 		const up = rows.slice().sort((a, b) => b.change - a.change).slice(0, 5), down = rows.slice().sort((a, b) => a.change - b.change).slice(0, 5);
 		const li = x => `<li><a href="#${x.r.slug}">${esc(x.r.label)}</a><span class="mo-spark" data-s="${x.r.slug}"></span><span class="trend trend-${x.change > 0 ? "up" : "down"}">${signed(x.change)}</span></li>`;
 		el.innerHTML = `<div class="mo"><div><h4>Accelerating</h4><ol>${up.map(li).join("")}</ol></div><div><h4>Slowing</h4><ol>${down.map(li).join("")}</ol></div></div>`;
-		el.querySelectorAll(".mo-spark").forEach(s => Charts.spark(s, Data.bySlug.get(s.dataset.s).data.articlesPerDay, 150));
+		el.querySelectorAll(".mo-spark").forEach(s => Charts.spark(s, Data.bySlug.get(s.dataset.s).recent, 150));
 	},
 
 	redraw() {

@@ -7,13 +7,16 @@ no cookies kept. Each article is linked to a Wayback Machine copy; with
 doesn't hold yet.
 
 Usage: python fetch_headlines.py <pravda-all-domains.json> <out headlines.json> [--per-domain 10] [--archive]
+       python fetch_headlines.py <pravda-all-domains.json> --probe [N]
+--probe tries every feed path on N domains (default 3), prints what each returns and writes nothing.
 Standard library only.
 """
 import json, sys, time, urllib.request, urllib.error, xml.etree.ElementTree as ET
 from email.utils import parsedate_to_datetime
 from datetime import datetime, timezone
 
-MAPPING, OUT = sys.argv[1], sys.argv[2]
+MAPPING, OUT = sys.argv[1], (sys.argv[2] if len(sys.argv) > 2 and not sys.argv[2].startswith("--") else None)
+PROBE = int(sys.argv[sys.argv.index("--probe") + 1]) if "--probe" in sys.argv and sys.argv.index("--probe") + 1 < len(sys.argv) else (3 if "--probe" in sys.argv else 0)
 PER = int(sys.argv[sys.argv.index("--per-domain") + 1]) if "--per-domain" in sys.argv else 10
 ARCHIVE = "--archive" in sys.argv
 UA = "PravdaAtlas-research-bot/1.0 (+https://github.com/Solatrix/Pravda-Dashboard)"
@@ -68,6 +71,29 @@ def wayback(url):
 
 mapping = json.load(open(MAPPING))
 domains = sorted({d for ds in mapping["Regions"].values() for d in ds})
+
+if PROBE:
+    # Spread the sample across the alphabet so it covers different site generations.
+    sample = domains[::max(1, len(domains) // PROBE)][:PROBE]
+    for d in sample:
+        print(f"== {d}")
+        for path in CANDIDATES:
+            url = f"https://{d}{path}"
+            try:
+                req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept": "application/rss+xml, application/xml, text/xml"})
+                with urllib.request.urlopen(req, timeout=20) as r:
+                    body, status, ctype, final = r.read(), r.status, r.headers.get("Content-Type", ""), r.geturl()
+                try: items = parse(body)
+                except ET.ParseError: items = None
+                note = f"{len(items)} items, newest: {items[0]['title'][:70]!r}" if items else ("not XML" if items is None else "XML, 0 items")
+                print(f"  {path:<18} {status} {ctype[:30]:<30} {len(body):>8} B  {note}" + (f"  -> {final}" if final != url else ""))
+            except urllib.error.HTTPError as e:
+                print(f"  {path:<18} {e.code}")
+            except Exception as e:
+                print(f"  {path:<18} error: {type(e).__name__}: {e}")
+            time.sleep(1)
+    sys.exit(0)
+
 out = {"generated": datetime.now(timezone.utc).isoformat(timespec="minutes"), "domains": {}, "failed": []}
 for d in domains:
     items = None
