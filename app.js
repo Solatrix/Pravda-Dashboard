@@ -767,7 +767,7 @@ const App = {
 		</section>
 		<section class="sec">
 			<h3 class="sec-h">Who supplies the content</h3>
-			<p class="sec-sub">Top sources since the target's first article. ${pct(tgShare)} of the top-source volume comes from Telegram channels${maxShare > 0 ? ` and ${pct(maxShare)} from MAX channels` : ""}.</p>
+			<p class="sec-sub">Top sources since the target's first article. Across all ${full.format(d.topSources.length)} sources recorded for this target, ${pct(tgShare)} of articles come from Telegram channels${maxShare > 0 ? ` and ${pct(maxShare)} from MAX channels` : ""}.</p>
 			<div id="r-sources"></div>
 		</section>
 		<section class="sec">
