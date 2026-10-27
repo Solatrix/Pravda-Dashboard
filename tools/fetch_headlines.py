@@ -11,7 +11,7 @@ Usage: python fetch_headlines.py <pravda-all-domains.json> <out headlines.json> 
 --probe tries every feed path on N domains (default 3), prints what each returns and writes nothing.
 Standard library only.
 """
-import json, sys, time, urllib.request, urllib.error, xml.etree.ElementTree as ET
+import json, sys, time, http.client, urllib.request, urllib.error, xml.etree.ElementTree as ET
 from email.utils import parsedate_to_datetime
 from datetime import datetime, timezone
 
@@ -20,8 +20,8 @@ PROBE = int(sys.argv[sys.argv.index("--probe") + 1]) if "--probe" in sys.argv an
 PER = int(sys.argv[sys.argv.index("--per-domain") + 1]) if "--per-domain" in sys.argv else 10
 ARCHIVE = "--archive" in sys.argv
 UA = "PravdaAtlas-research-bot/1.0 (+https://github.com/Solatrix/Pravda-Dashboard)"
-# Feed locations to try, in order. Confirm the right one on a live site and put it first.
-CANDIDATES = ["/rss", "/rss.xml", "/feed", "/feed/", "/sitemap-news.xml", "/sitemap.xml"]
+# Feed locations to try, in order. /rss.xml confirmed by --probe on GitHub (Oct 2026): 200 items per site.
+CANDIDATES = ["/rss.xml", "/rss", "/feed", "/feed/", "/sitemap-news.xml", "/sitemap.xml"]
 NS = {"atom": "http://www.w3.org/2005/Atom", "news": "http://www.google.com/schemas/sitemap-news/0.9",
       "sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
 
@@ -101,8 +101,10 @@ for d in domains:
         try:
             items = parse(get(f"https://{d}{path}"))
             if items: break
-        except (urllib.error.URLError, ET.ParseError, TimeoutError, ValueError):
-            continue
+        except (urllib.error.HTTPError, http.client.HTTPException, ET.ParseError, ValueError):
+            continue  # the site answers but not with a feed here: try the next path
+        except OSError:
+            break     # DNS failure, timeout or dropped connection: the site is down, skip it
     if not items:
         out["failed"].append(d); continue
     items.sort(key=lambda i: i["published"] or "", reverse=True)

@@ -3,10 +3,8 @@
 # so visitors load ~80 KB instead of every domain file (~54 MB).
 name: Build target summary
 on:
-  push:   # TEMP: test runs on the atlas branch before merging; remove before merge
-    branches: [atlas]
   schedule:
-    - cron: "10 7,19 * * *"   # twice daily, ~40 min after CheckFirst's updates (~06:30 and ~18:25 UTC)
+    - cron: "10 7,19 * * *"
   workflow_dispatch:
 permissions:
   contents: write
