@@ -70,7 +70,7 @@ body { display: flex; flex-direction: column; }
 .mrow select { flex: 1; min-width: 0; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 5px 8px; }
 .growth-ctl input:disabled { opacity: .35; }
 .growth-steps span { cursor: default; }
-#status { position: absolute; inset: 0; display: grid; place-items: center; font-size: 13px; }
+#status { position: absolute; inset: 0; z-index: 20; display: grid; place-items: center; padding: 16px; font-size: 13px; background: var(--bg); }
 .panel { overflow-y: auto; border-left: 1px solid var(--line); background: var(--surface); padding-block: 22px 40px; padding-left: 22px; padding-right: max(22px, env(safe-area-inset-right, 0px)); }
 .overview, #region { display: grid; gap: 30px; }
 body[data-view="region"] .overview { display: none; }
@@ -150,7 +150,14 @@ body[data-view="region"] .overview { display: none; }
 <main class="app">
 	<section class="stage" aria-label="Globe of targeted countries">
 		<div id="globe"></div>
-		<p id="status" role="status"></p>
+		<div id="status">
+			<div class="ld">
+				<p class="ld-title">Loading the Pravda network <span id="ld-pct">0%</span></p>
+				<div class="ld-bar" id="ld-bar" role="progressbar" aria-label="Loading the Pravda network" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="ld-fill"></i></div>
+				<p class="ld-caption" id="ld-caption">Libraries</p>
+				<div class="ld-errors" id="ld-errors" aria-live="assertive"></div>
+			</div>
+		</div>
 		<div class="float stage-legend" id="legend"></div>
 		<div class="float stage-month"><h2>Month <span id="month-status"></span></h2><div id="monthly"></div></div>
 	</section>
@@ -177,9 +184,19 @@ body[data-view="region"] .overview { display: none; }
 </main>
 <div id="tooltip" hidden></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/globe.gl@2.46.2/dist/globe.gl.min.js"></script>
+<script>
+// Libraries fill the first 10% of the loader bar as they arrive; app.js takes over once it runs.
+const libs = { got: 0, $: id => document.getElementById(id) };
+libs.ok = () => {
+	const p = Math.round(++libs.got / 3 * 10) + "%";
+	libs.$("ld-fill").style.width = libs.$("ld-pct").textContent = p;
+	libs.$("ld-caption").textContent = `Libraries · ${libs.got} of 3`;
+};
+libs.fail = name => { document.body.dataset.state = "error"; libs.$("ld-errors").innerHTML = `<p class="ld-err">${name} did not load <button type="button" onclick="location.reload()">Retry</button></p>`; };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js" onload="libs.ok('d3')" onerror="libs.fail('d3')"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js" onload="libs.ok('topojson')" onerror="libs.fail('topojson')"></script>
+<script src="https://cdn.jsdelivr.net/npm/globe.gl@2.46.2/dist/globe.gl.min.js" onload="libs.ok('globe.gl')" onerror="libs.fail('globe.gl')"></script>
 <script src="./app.js"></script>
 <script>
 PravdaAtlas.start({

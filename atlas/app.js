@@ -40,23 +40,89 @@ function mergeCounts(lists, key, val = "count") {
 	return [...m].map(([k, v]) => ({ [key]: k, [val]: v }));
 }
 
+/* ---------- loader: one line per step until the globe and every target file are in ---------- */
+// Reads the body as a stream so the loader can count bytes; onBytes gets each chunk's size.
+async function fetchJSON(url, onBytes) {
+	const r = await fetch(url);
+	if (!r.ok) throw Object.assign(new Error(`HTTP ${r.status}`), { status: r.status });
+	if (!r.body) return r.json();
+	const reader = r.body.getReader(), chunks = [];
+	for (;;) {
+		const { done, value } = await reader.read();
+		if (done) break;
+		chunks.push(value); onBytes?.(value.length);
+	}
+	return JSON.parse(await new Blob(chunks).text());
+}
+const kb = n => n < 1e6 ? `${Math.max(1, Math.round(n / 1e3))} KB` : `${(n / 1e6).toFixed(1)} MB`;
+
+// One bar for the whole load. Each step owns a fixed share of 100 (libraries 10, data files 5 each,
+// globe 10, target files 50) and fills within it, so the bar never moves backwards.
+const Loader = {
+	steps: [{ name: "Libraries", weight: 10, frac: 1, state: "done" }],
+	add(name, weight, detail = "") { const s = { name, weight, detail, frac: 0, state: "run" }; this.steps.push(s); return this.set(s); },
+	set(s, { state, detail, frac } = {}) {
+		if (state) s.state = state;
+		if (detail != null) s.detail = detail;
+		if (frac != null) s.frac = frac;
+		if (s.state !== "run") s.frac = 1;
+		else this.current = s;
+		this.render();
+		return s;
+	},
+	render() {
+		const p = Math.min(1, d3.sum(this.steps, s => s.weight * s.frac) / 100);
+		$("#ld-fill").style.width = $("#ld-pct").textContent = pct(p);
+		$("#ld-bar").setAttribute("aria-valuenow", Math.round(p * 100));
+		const s = this.current?.state === "run" ? this.current : this.steps.findLast(x => x.state === "run");
+		if (s) $("#ld-caption").textContent = s.detail ? `${s.name} · ${s.detail}` : s.name;
+	},
+	// Shows the failure under the bar and resolves with the label of the button pressed.
+	fail(s, msg, buttons = ["Retry"]) {
+		const box = $("#ld-errors"), row = document.createElement("p");
+		row.className = "ld-err"; row.textContent = `${s.name}: ${msg}`;
+		box.append(row);
+		document.body.dataset.state = "error";
+		return new Promise(res => buttons.forEach(b => {
+			const btn = document.createElement("button");
+			btn.type = "button"; btn.textContent = b;
+			btn.onclick = () => { row.remove(); if (!box.children.length) document.body.dataset.state = "loading"; res(b); };
+			row.append(btn);
+		}));
+	},
+	// A required file retries until it loads; an optional one is skipped and resolves null.
+	async load(name, url, { optional = false } = {}) {
+		const s = this.add(name, 5);
+		for (;;) {
+			let n = 0;
+			try {
+				const json = await fetchJSON(url, b => this.set(s, { detail: kb(n += b) }));
+				this.set(s, { state: "done" });
+				return json;
+			} catch (e) {
+				if (optional) { this.set(s, { state: "skip" }); return null; }
+				await this.fail(s, e.status ? e.message : "network error");
+			}
+		}
+	},
+};
+
 /* ---------- data ---------- */
 const Data = {
 	async init(cfg) {
 		this.cfg = cfg;
-		const get = p => fetch(p).then(r => { if (!r.ok) throw new Error(`${r.status} ${p}`); return r.json(); });
-		const optional = p => fetch(p).then(r => r.ok ? r.json() : null).catch(() => null);
 		const [mapping, network, infoDefense, topo, history, headlines] = await Promise.all([
-			get(cfg.resBase + "pravda-all-domains.json"),
-			get(cfg.feedBase + "a.network.news-pravda.com_viz.json"),
-			get(cfg.resBase + "info-defense-dataset.json"),
-			get(cfg.resBase + "countries-50m.json"),
-			optional(cfg.resBase + "history.json"),
-			optional(cfg.resBase + "headlines.json"),
+			Loader.load("Domain mapping", cfg.resBase + "pravda-all-domains.json"),
+			Loader.load("Network totals", cfg.feedBase + "a.network.news-pravda.com_viz.json"),
+			Loader.load("InfoDefense list", cfg.resBase + "info-defense-dataset.json"),
+			Loader.load("Map shapes", cfg.resBase + "countries-50m.json"),
+			Loader.load("Monthly history", cfg.resBase + "history.json", { optional: true }),
+			Loader.load("Headlines", cfg.resBase + "headlines.json", { optional: true }),
 		]);
 		Object.assign(this, { mapping, network, topo, history, headlines });
 		this.infoDefense = new Set(Object.values(infoDefense));
 		this.cache = new Map();
+		this.failed = new Set();
 		this.lastDate = network.articlesPerDay.at(-1).date;
 
 		const perDomain = new Map(network.articlesPerDomain.map(e => [e.domain, e.totalArticles]));
@@ -74,7 +140,8 @@ const Data = {
 
 	domainFile(domain) {
 		if (!this.cache.has(domain)) {
-			this.cache.set(domain, fetch(`${this.cfg.feedBase}${domain}_viz.json`).then(r => r.ok ? r.json() : null).catch(() => null));
+			this.cache.set(domain, fetchJSON(`${this.cfg.feedBase}${domain}_viz.json`, b => this.onBytes?.(b))
+				.catch(() => { this.failed.add(domain); return null; }));
 		}
 		return this.cache.get(domain);
 	},
@@ -102,6 +169,13 @@ const Data = {
 			firstDay: days.find(d => d.count > 0)?.date,
 		};
 		return r.data;
+	},
+
+	// Forgets failed downloads so allRegions fetches them again.
+	resetFailed() {
+		for (const d of this.failed) this.cache.delete(d);
+		for (const r of this.regions) if (r.live.some(d => this.failed.has(d))) r.data = null;
+		this.failed.clear();
 	},
 
 	async allRegions(onProgress) {
@@ -311,11 +385,13 @@ const Map3D = {
 		this.pins = Data.regions.filter(r => r.meta.lat != null).map(r => ({ r, lat: r.meta.lat, lng: r.meta.lon }));
 		this.state = { hover: null, selected: null };
 		this.metric = { kind: "total" };
+		this.drawn = new Promise(res => this.markDrawn = res);
 
 		const g = this.g = Globe({ animateIn: !reduceMotion })(el)
 			.backgroundColor("rgba(0,0,0,0)")
 			.showGraticules(true)
 			.polygonsData(feats)
+			.onGlobeReady(() => this.whenDrawn())
 			.polygonsTransitionDuration(reduceMotion ? 0 : 600)
 			.polygonAltitude(f => this.alt(f))
 			.polygonCapColor(f => this.cap(f))
@@ -337,6 +413,13 @@ const Map3D = {
 		el.addEventListener("pointerdown", () => this.stopRotate());
 		this.theme();
 		new ResizeObserver(() => g.width(el.clientWidth).height(el.clientHeight)).observe(el);
+	},
+	// onGlobeReady fires for the bare sphere; the country meshes are built afterwards on the main
+	// thread, so wait until they exist in the scene and one more frame has been painted.
+	whenDrawn() {
+		const has = () => { let n = 0; this.g.scene().traverse(o => { if (o.__globeObjType === "polygon") n++; }); return n > 0; };
+		const tick = () => has() ? requestAnimationFrame(() => this.markDrawn()) : requestAnimationFrame(tick);
+		tick();
 	},
 	theme() {
 		this.colors = { sea: css("--globe-sea"), land: css("--globe-land"), stroke: css("--globe-stroke"), select: css("--globe-select"), atmo: css("--globe-atmo") };
@@ -431,15 +514,16 @@ const App = {
 	async start(cfg) {
 		this.cfg = cfg;
 		document.body.dataset.state = "loading";
-		try { await Data.init(cfg); }
-		catch (e) { document.body.dataset.state = "error"; $("#status").textContent = `The data could not be loaded (${e.message}). Check your connection and reload the page.`; return; }
+		Loader.render();
+		await Data.init(cfg);
+		const draw = Loader.add("Drawing the globe", 10);
 		Map3D.init($("#globe"), this);
+		Map3D.drawn.then(() => Loader.set(draw, { state: "done" }));
 		this.kpis(); this.legend(); this.search(); this.ranking(); this.rhythm(); this.networkHistory();
 		this.watchTheme();
-		document.body.dataset.state = "ready";
 		addEventListener("hashchange", () => this.route());
 		this.route();
-		this.loadAll();
+		Promise.all([Map3D.drawn, this.loadAll()]).then(() => { document.body.dataset.state = "ready"; });
 		let t, lastW = document.body.clientWidth;
 		new ResizeObserver(() => {
 			const w = document.body.clientWidth;
@@ -449,10 +533,20 @@ const App = {
 	},
 
 	async loadAll() {
-		const prog = $("#month-status");
-		if (prog) prog.textContent = "Loading monthly figures…";
-		await Data.allRegions((d, n) => { if (prog) prog.textContent = `Loading monthly figures: ${d} of ${n} targets`; });
-		if (prog) prog.textContent = "";
+		const n = Data.regions.length;
+		let done = 0, bytes = 0;
+		const step = Loader.add("Target files", 50);
+		const show = () => Loader.set(step, { detail: `${done} of ${n} · ${kb(bytes)}`, frac: done / n });
+		Data.onBytes = b => { bytes += b; show(); };
+		for (;;) {
+			await Data.allRegions(d => { done = d; show(); });
+			if (!Data.failed.size) break;
+			const choice = await Loader.fail(step, `${Data.failed.size} file${Data.failed.size > 1 ? "s" : ""} failed`, ["Retry", "Continue without them"]);
+			if (choice !== "Retry") break;
+			Data.resetFailed();
+		}
+		Data.onBytes = null;
+		Loader.set(step, { state: "done" });
 		this.allLoaded = true;
 		document.body.dataset.deep = "ready";
 		const def = Data.partialMonth ? Data.months.at(-2) : Data.months.at(-1);
