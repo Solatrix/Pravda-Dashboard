@@ -13,6 +13,8 @@ from collections import Counter, defaultdict
 REPO, MAPPING, OUT = sys.argv[1:4]
 CACHE = sys.argv[4] if len(sys.argv) > 4 else os.path.join(os.path.dirname(OUT), ".history-cache")
 os.makedirs(CACHE, exist_ok=True)
+# Network-wide totals, not sites: all.news-pravda.com until April 2025, then a.network.news-pravda.com.
+NETWORK_FILES = ("a.network.news-pravda.com", "all.news-pravda.com")
 git = lambda *a: subprocess.run(["git", "-C", REPO, *a], check=True, capture_output=True).stdout
 
 
@@ -49,7 +51,7 @@ def snapshot(sha):
                 "sources": {e["source"]: e["count"] for e in d.get("topSources", [])},
                 "categories": {e["category"]: e["count"] for e in d.get("categories", [])},
                 "languages": {e["language"]: e["count"] for e in d.get("languages", [])},
-                "domains": d.get("allDomains") if dom.startswith("a.network") else None,
+                "domains": d.get("allDomains") if dom in NETWORK_FILES else None,
             }
     json.dump(snap, open(path, "w"), separators=(",", ":"))
     return snap
@@ -104,11 +106,11 @@ for name, doms in regions.items():
 
 prev = None
 for label, _, snap in snaps:
-    net = next((v for k, v in snap.items() if k.startswith("a.network")), None)
-    cur = set((net or {}).get("domains") or [k for k in snap if not k.startswith("a.network")])
+    net = next((v for k, v in snap.items() if k in NETWORK_FILES), None)
+    cur = set((net or {}).get("domains") or [k for k in snap if k not in NETWORK_FILES])
     # Keep the network's own sites; from 2026 the list also carries AMP mirrors and telegra.ph.
     known = {d for ds in regions.values() for d in ds}
-    cur = {d for d in cur if d in known or (d.endswith("news-pravda.com") and "ampproject" not in d)}
+    cur = {d for d in cur if d not in NETWORK_FILES and (d in known or (d.endswith("news-pravda.com") and "ampproject" not in d))}
     if prev is not None:
         hist["network"]["domains"].append(len(cur))
         hist["network"]["added"].append(sorted(cur - prev))
