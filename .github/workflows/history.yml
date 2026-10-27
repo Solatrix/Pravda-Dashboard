@@ -1,0 +1,34 @@
+# .github/workflows/history.yml — monthly history from CheckFirst's git snapshots.
+# Reads month-end commits of CheckFirstHQ/pravda-network (read-only) and commits res/json/history.json.
+name: Build monthly history
+on:
+  schedule:
+    - cron: "41 4 1 * *"   # 1st of each month, 04:41 UTC
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  history:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check out CheckFirst's data with full history (file contents fetched on demand)
+        run: git clone --filter=blob:none --no-checkout https://github.com/CheckFirstHQ/pravda-network.git ../pravda-network
+      - name: Restore snapshot cache
+        uses: actions/cache@v4
+        with:
+          path: .history-cache
+          key: history-${{ github.run_id }}
+          restore-keys: history-
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python tools/build_history.py ../pravda-network res/json/pravda-all-domains.json res/json/history.json .history-cache
+      - name: Commit if changed
+        run: |
+          git config user.name "history-bot"
+          git config user.email "history-bot@users.noreply.github.com"
+          git add res/json/history.json
+          git diff --cached --quiet || git commit -m "Update monthly history"
+          git push

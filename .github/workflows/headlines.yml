@@ -1,0 +1,26 @@
+# .github/workflows/headlines.yml — nightly headline collection for the Atlas.
+# Fetches each domain's RSS feed from GitHub's machines and commits res/json/headlines.json.
+name: Collect headlines
+on:
+  schedule:
+    - cron: "17 3 * * *"   # daily, 03:17 UTC
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  headlines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python tools/fetch_headlines.py res/json/pravda-all-domains.json res/json/headlines.json --per-domain 10 --archive
+      - name: Commit if changed
+        run: |
+          git config user.name "headlines-bot"
+          git config user.email "headlines-bot@users.noreply.github.com"
+          git add res/json/headlines.json
+          git diff --cached --quiet || git commit -m "Update headlines"
+          git push
