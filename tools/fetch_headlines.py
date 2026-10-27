@@ -3,8 +3,9 @@
 Runs nightly in a GitHub Action, so visitors' browsers never contact the
 network's sites: one request per domain per night, from GitHub's machines,
 no cookies kept. Each article is linked to a Wayback Machine copy; with
---archive the job also asks the Wayback Machine to capture articles it
-doesn't hold yet.
+--archive the job also asks the Wayback Machine to capture each domain's
+newest article if it doesn't hold it yet (about 100 requests a night).
+The run stops collecting after 45 minutes and writes what it has.
 
 Usage: python fetch_headlines.py <pravda-all-domains.json> <out headlines.json> [--per-domain 10] [--archive]
        python fetch_headlines.py <pravda-all-domains.json> --probe [N]
@@ -55,14 +56,14 @@ def parse(xml):
     return [i for i in items if i["title"] and i["url"]]
 
 
-def wayback(url):
-    """Closest existing capture, or a capture request when --archive is set."""
+def wayback(url, save=False):
+    """Closest existing capture; with save=True, ask for a capture when there is none."""
     try:
         data = json.loads(get("https://archive.org/wayback/available?url=" + urllib.request.quote(url, safe="")))
         snap = data.get("archived_snapshots", {}).get("closest")
         if snap and snap.get("available"): return snap["url"]
-        if ARCHIVE:
-            get("https://web.archive.org/save/" + url, timeout=60)
+        if save:
+            get("https://web.archive.org/save/" + url, timeout=30)
             time.sleep(5)  # stay well under Save Page Now's rate limit
     except Exception:
         pass
@@ -95,7 +96,12 @@ if PROBE:
     sys.exit(0)
 
 out = {"generated": datetime.now(timezone.utc).isoformat(timespec="minutes"), "domains": {}, "failed": []}
+deadline = time.monotonic() + 45 * 60   # the workflow is killed at 60 minutes
 for d in domains:
+    if time.monotonic() > deadline:
+        out["skipped"] = domains[domains.index(d):]
+        print(f"time budget reached, {len(out['skipped'])} domains left for tomorrow", file=sys.stderr)
+        break
     items = None
     for path in CANDIDATES:
         try:
@@ -108,7 +114,7 @@ for d in domains:
     if not items:
         out["failed"].append(d); continue
     items.sort(key=lambda i: i["published"] or "", reverse=True)
-    out["domains"][d] = [{**i, "archive": wayback(i["url"])} for i in items[:PER]]
+    out["domains"][d] = [{**i, "archive": wayback(i["url"], save=ARCHIVE and k == 0)} for k, i in enumerate(items[:PER])]
     time.sleep(1)  # one domain per second: gentle on their servers and on archive.org
 json.dump(out, open(OUT, "w"), ensure_ascii=False, indent=1)
 print(f"{len(out['domains'])} domains with headlines, {len(out['failed'])} without", file=sys.stderr)
