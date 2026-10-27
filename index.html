@@ -64,6 +64,17 @@ body { display: flex; flex-direction: column; }
 .theme-btn { flex: none; display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 1px solid var(--line); border-radius: var(--r-sm); background: var(--surface); color: var(--ink-2); cursor: pointer; }
 .theme-btn:hover { color: var(--ink); }
 .theme-btn svg { width: 18px; height: 18px; }
+.welcome { width: min(440px, calc(100% - 32px)); padding: 22px 24px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); box-shadow: 0 18px 48px rgb(0 0 0 / .25); }
+.welcome::backdrop { background: rgb(0 0 0 / .45); }
+.welcome h2 { font: 600 19px/1.25 var(--f-display); margin: 0 28px 10px 0; }
+.welcome p { margin: 0 0 10px; line-height: 1.5; }
+.welcome ul { margin: 0 0 12px; padding-left: 18px; line-height: 1.5; color: var(--ink-2); }
+.welcome-x { position: absolute; top: 12px; right: 12px; width: 30px; height: 30px; border: 0; border-radius: var(--r-sm); background: none; color: var(--ink-2); font-size: 20px; line-height: 1; cursor: pointer; }
+.welcome-x:hover { color: var(--ink); background: var(--surface-2); }
+.welcome-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+.welcome-actions > * { font: 600 13px var(--f-body); padding: 8px 14px; border-radius: var(--r-sm); cursor: pointer; text-decoration: none; }
+.welcome-alt { border: 1px solid var(--line); color: var(--ink); background: var(--surface); }
+.welcome-go { border: 0; background: var(--accent); color: var(--accent-ink); }
 .app { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 460px); }
 .stage { position: relative; min-height: 0; overflow: hidden; background: radial-gradient(ellipse at 50% 45%, color-mix(in srgb, var(--surface) 70%, transparent), transparent 70%); }
 #globe { position: absolute; inset: 0; }
@@ -187,11 +198,33 @@ body[data-view="region"] .overview { display: none; }
 				<section class="sec"><h2 class="sec-h">Hour of publication</h2><div id="net-hours"></div></section>
 				<section class="sec"><h2 class="sec-h">Day of week</h2><div id="rhythm"></div></section>
 			</div>
-			<p class="note">Data: CheckFirst, Pravda Network Data Collection (snapshot), and its git history for month-by-month sources. Map shapes: Natural Earth via world-atlas. By Valentin Châtelet.</p>
+			<p class="note">Data: CheckFirst, Pravda Network Data Collection (snapshot), and its git history for month-by-month sources. Map shapes: Natural Earth via world-atlas. By Valentin Châtelet. <a href="./legacy/">Legacy dashboard</a></p>
 		</div>
 	</aside>
 </main>
 <div id="tooltip" hidden></div>
+
+<dialog id="welcome" class="welcome" aria-labelledby="welcome-title">
+	<form method="dialog">
+		<button class="welcome-x" value="close" aria-label="Close">×</button>
+		<h2 id="welcome-title">Welcome to the Pravda Network Atlas</h2>
+		<p>This is the new version of the Pravda Dashboard.</p>
+		<ul>
+			<li>A globe of every target, including regions and themes</li>
+			<li>Month-by-month rankings with playback</li>
+			<li>Sources, categories and closest twins for each target</li>
+		</ul>
+		<p>The previous dashboard is still available.</p>
+		<div class="welcome-actions">
+			<a class="welcome-alt" href="./legacy/">Open legacy dashboard</a>
+			<button class="welcome-go" value="close" autofocus>Explore the Atlas</button>
+		</div>
+	</form>
+</dialog>
+<script>
+// Shown on every visit until the end of the transition period.
+if (new Date() < new Date("2027-02-01T00:00:00Z")) { const w = document.getElementById("welcome"); if (w.showModal) w.showModal(); }
+</script>
 
 <script>
 // Libraries fill the first 10% of the loader bar as they arrive; app.js takes over once it runs.

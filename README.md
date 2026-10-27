@@ -1,28 +1,34 @@
-# Pravda Dashboard - World Map
+# Pravda Network Atlas
 
-## Context & Acknowledgments
+An interactive globe of the Pravda Network, the Russian disinformation network first reported by Viginum. It shows which countries, regions and themes each site targets, how output changes month by month, and the sources behind each target.
 
-The Pravda Dashboard World Map is a collaborative effort between [@DFRLab](https://www.dfrlab.org) and [@CheckFirstHQ](https://www.checkfirst.network), aimed at reverse-engineering and visualizing the Pravda Network—a well-established Russian disinformation network initially reported by Viginum.
+**Live:** [solatrix.github.io/Pravda-Dashboard](https://solatrix.github.io/Pravda-Dashboard/) · [Legacy dashboard](https://solatrix.github.io/Pravda-Dashboard/legacy/)
 
-Explore the near real-time updated dataset published by CheckFirst in their [repository](https://github.com/CheckFirstHQ/pravda-network).
+## Data
 
-## The Pravda Network World Map
+All figures come from CheckFirst's near real-time [Pravda Network Data Collection](https://github.com/CheckFirstHQ/pravda-network). This repository adds:
 
-This repository hosts the code for visuals accompanying a piece published on the DFRLab website, illustrating the global footprint of the Pravda Network.
+- `res/json/pravda-all-domains.json`: which domains serve which target
+- `res/json/summary.json`: per-target monthly totals, recent days and twins (built twice daily)
+- `res/json/history.json`: month-by-month sources and categories from CheckFirst's git history (built weekly)
+- `res/json/headlines.json`: latest headlines with Wayback Machine links (built nightly)
 
-For deeper insights into the tactics employed by this network and the countries it targets, refer to [DFRLab's detailed blog post](https://dfrlab.org/the-pravda-network/).
+The site is static (GitHub Pages). The JSON files are built by GitHub Actions in `.github/workflows/`, using the scripts in `tools/`, so visitors' browsers never contact the network's sites.
 
-The repository leverages libraries such as D3.js, Plotly, and Leaflet. Additional resources include the CSS merge loader by [jh3y](https://jheytompkins.com). The remaining code is written in vanilla Javascript.
+## Run locally
 
-For a more comprehensive dashboard experience, visit CheckFirst's [Pravda Dashboard](https://portal-kombat.com).
+```sh
+python3 -m http.server 8000
+```
 
-Check-out the map in action on my [GitHub pages](https://solatrix.github.io/Pravda-Dashboard/)
+## Context
 
-## License and Attribution
+Originally built with [DFRLab](https://www.dfrlab.org) and [CheckFirst](https://www.checkfirst.network). For the network's tactics and targets, see [DFRLab's report](https://dfrlab.org/the-pravda-network/). CheckFirst also runs its own [Pravda Dashboard](https://portal-kombat.com).
 
-CheckFirst. Pravda Network Data Collection. [GitHub Repository](https://github.com/CheckFirstHQ/pravda-network).
+Built with D3, globe.gl and world-atlas (Natural Earth). The previous version, in `legacy/`, uses D3, Plotly and Leaflet.
 
-If you wish to refer to this app in your publications please do mention:
-`Valentin Châtelet. Pravda Dashboard - World Map. GitHub repository: https://github.com/Solatrix/Pravda-Dashboard`
+## Citation
+
+> Valentin Châtelet. *Pravda Network Atlas*. https://github.com/Solatrix/Pravda-Dashboard. Data: CheckFirst, Pravda Network Data Collection, https://github.com/CheckFirstHQ/pravda-network.
 
 **Maintainer:** Valentin Châtelet
