@@ -26,8 +26,9 @@ jobs:
       - run: python tools/build_summary.py ../pravda-network/json res/json/pravda-all-domains.json res/json/summary.json --sha "$(git -C ../pravda-network rev-parse HEAD)"
       - name: Commit if changed
         run: |
-          git config user.name "summary-bot"
-          git config user.email "summary-bot@users.noreply.github.com"
+          # GitHub's own Actions identity: a made-up name@users.noreply.github.com credits a real account.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add res/json/summary.json
           git diff --cached --quiet && exit 0
           git commit -m "Update target summary"

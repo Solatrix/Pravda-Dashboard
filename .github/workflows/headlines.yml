@@ -29,8 +29,9 @@ jobs:
       - name: Commit if changed
         if: ${{ !inputs.probe }}
         run: |
-          git config user.name "headlines-bot"
-          git config user.email "headlines-bot@users.noreply.github.com"
+          # GitHub's own Actions identity: a made-up name@users.noreply.github.com credits a real account.
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
           git add res/json/headlines.json
           git diff --cached --quiet && exit 0
           git commit -m "Update headlines"
