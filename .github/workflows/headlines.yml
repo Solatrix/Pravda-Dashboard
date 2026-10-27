@@ -2,6 +2,8 @@
 # Fetches each domain's RSS feed from GitHub's machines and commits res/json/headlines.json.
 name: Collect headlines
 on:
+  push:   # TEMP: test runs on the atlas branch before merging; remove before merge
+    branches: [atlas]
   schedule:
     - cron: "17 3 * * *"   # daily, 03:17 UTC
   workflow_dispatch:
@@ -22,12 +24,12 @@ jobs:
         with:
           python-version: "3.12"
       - name: Probe feed paths
-        if: inputs.probe
+        if: inputs.probe || github.event_name == 'push'
         run: python tools/fetch_headlines.py res/json/pravda-all-domains.json --probe 4
-      - if: ${{ !inputs.probe }}
+      - if: ${{ !inputs.probe && github.event_name != 'push' }}
         run: python tools/fetch_headlines.py res/json/pravda-all-domains.json res/json/headlines.json --per-domain 10 --archive
       - name: Commit if changed
-        if: ${{ !inputs.probe }}
+        if: ${{ !inputs.probe && github.event_name != 'push' }}
         run: |
           git config user.name "headlines-bot"
           git config user.email "headlines-bot@users.noreply.github.com"

@@ -2,6 +2,8 @@
 # Reads month-end commits of CheckFirstHQ/pravda-network (read-only) and commits res/json/history.json.
 name: Build monthly history
 on:
+  push:   # TEMP: test runs on the atlas branch before merging; remove before merge
+    branches: [atlas]
   schedule:
     - cron: "41 4 * * 1"   # Mondays, 04:41 UTC: weekly runs keep the snapshot cache (GitHub drops caches unused for 7 days)
   workflow_dispatch:
