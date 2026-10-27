@@ -1,5 +1,6 @@
 import { nonGeographicEntries, localeNb } from "./constants.js";
 import { URLRouter } from "./urlrouter.class.js" 
+import { addBasemap } from "./basemap.js"
 import { renderPostingFrequencyChart, renderTopSourcesChart, renderCategories, renderHourlyGraph, renderSourcesByDay } from "./graphCollection.js"
 (async (d3js) => {
 	const d3 = d3js
@@ -53,17 +54,7 @@ import { renderPostingFrequencyChart, renderTopSourcesChart, renderCategories, r
 		})
 
 		map.attributionControl.setPosition('bottomleft');
-		map.createPane("labels")
-		map.getPane("labels").style.zIndex = 99999;
-
-		L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", {
-			attribution: "©OpenStreetMap, ©CartoDB",
-		}).addTo(map);
-		L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png",
-			{
-				pane:"labels"
-			}
-		).addTo(map);
+		addBasemap(map, "CheckFirst & DFRLab")
 		fetch("./res/json/countries-min.geojson")
 			.then((response) => response.json())
 			.then((geojsonData) => {

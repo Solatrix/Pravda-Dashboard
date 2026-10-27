@@ -1,5 +1,6 @@
 import { nonGeographicEntries, localeNb } from "./constants.js";
 import { modalBox } from "./modalBox.js";
+import { addBasemap } from "./basemap.js";
 
 (async (d3, L) => {
 	async function loadData() {
@@ -26,8 +27,7 @@ import { modalBox } from "./modalBox.js";
 
 		map.dragging.enable();
 		map.attributionControl.setPosition('bottomleft');
-		map.createPane("labels")
-		map.getPane("labels").style.zIndex = 99999;
+		addBasemap(map, "CheckFirst & DFRLab")
 
 		function showData(feature, layer) {
 
@@ -58,14 +58,6 @@ import { modalBox } from "./modalBox.js";
 
 		}
 
-		L.tileLayer("https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", {
-			attribution: "©OpenStreetMap, ©CartoDB, CheckFirst & DFRLab",
-		}).addTo(map);
-		L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png",
-			{
-				pane: "labels"
-			}
-		).addTo(map);
 		const geojson = await fetch("res/json/countries-min.geojson")
 			.then(async (response) => { 
 				let r = await response.json()
