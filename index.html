@@ -222,8 +222,8 @@ body[data-view="region"] .overview { display: none; }
 	</form>
 </dialog>
 <script>
-// Shown on every visit until the end of the transition period.
-if (new Date() < new Date("2027-02-01T00:00:00Z")) { const w = document.getElementById("welcome"); if (w.showModal) w.showModal(); }
+// Shown on every visit until the end of the transition period, once the globe has been drawn (app.js calls it).
+window.showWelcome = () => { const w = document.getElementById("welcome"); if (new Date() < new Date("2027-02-01T00:00:00Z") && w.showModal) w.showModal(); };
 </script>
 
 <script>

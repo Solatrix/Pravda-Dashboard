@@ -28,15 +28,17 @@ const langName = (() => {
 	return code => { try { return dn ? dn.of(code) : code; } catch { return code; } };
 })();
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-// Phones and low-memory devices: same outlines, but no height animation (it rebuilds every country's
-// 3D shape on each frame) and coarser country caps, so building the globe doesn't freeze the page.
-const lightGlobe = matchMedia("(max-width: 900px)").matches || (navigator.deviceMemory || 8) <= 4;
+// Phones and tablets: same outlines, but no height animation (it rebuilds every country's 3D shape on
+// each frame), coarser country caps and a cheaper canvas. (navigator.deviceMemory is not used: Brave randomises it.)
+const lightGlobe = matchMedia("(max-width: 900px), (pointer: coarse)").matches;
 const TYPE_LABEL = { country: "Country", subnational: "Sub-national", supranational: "Supranational", thematic: "Thematic", hub: "Network hub" };
 const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-const isTelegram = s => s.startsWith("Telegram:");
+// Telegram channels appear as "Telegram: <handle>", and as "Telegrami <handle>" (Estonian) on the Estonian site.
+const TELEGRAM = /^Telegrami?:?\s+/;
+const isTelegram = s => TELEGRAM.test(s);
 // MAX (VK's messenger) channels appear as "MAX <channel>" or as max.ru links.
 const isMax = s => s.startsWith("MAX") || s.includes("max.ru");
-const sourceLabel = s => isTelegram(s) ? s.slice(9).trim() : s.startsWith("MAX") ? s.replace(/^MAX:?\s*/, "") : s;
+const sourceLabel = s => isTelegram(s) ? s.replace(TELEGRAM, "") : s.startsWith("MAX") ? s.replace(/^MAX:?\s*/, "") : s;
 const sourceChip = s => isTelegram(s) ? `<span class="chip chip-tg">Telegram</span>` : isMax(s) ? `<span class="chip chip-max">MAX</span>` : `<span class="chip chip-web">Web</span>`;
 
 function mergeCounts(lists, key, val = "count") {
@@ -147,13 +149,14 @@ const Data = {
 			Loader.load("Domain mapping", cfg.resBase + "pravda-all-domains.json"),
 			Loader.load("Network totals", cfg.feedBase + "a.network.news-pravda.com_viz.json"),
 			Loader.load("InfoDefense list", cfg.resBase + "info-defense-dataset.json"),
-			Loader.load("Map shapes", cfg.resBase + "countries-50m.json"),
+			Loader.load("Map shapes", cfg.resBase + "countries.json"),
 			Loader.load("Monthly history", cfg.resBase + "history.json", { optional: true }),
 			Loader.load("Headlines", cfg.resBase + "headlines.json", { optional: true }),
 			Loader.load("Target summary", cfg.resBase + "summary.json", { optional: true }),
 		]);
 		Object.assign(this, { mapping, network, topo, history, headlines, summary });
-		this.infoDefense = new Set(Object.values(infoDefense));
+		// Telegram handles of InfoDefense channels, matched on every domain; handles are case-insensitive.
+		this.infoDefense = new Set(infoDefense.map(h => h.toLowerCase()));
 		this.cache = new Map();
 		this.failed = new Set();
 		this.lastDate = network.articlesPerDay.at(-1).date;
@@ -429,18 +432,25 @@ const Charts = {
 const Map3D = {
 	init(el, app) {
 		this.app = app; this.el = el;
-		const feats = topojson.feature(Data.topo, Data.topo.objects.countries).features.filter(f => f.id !== "010");
-		for (const f of feats) { f.region = Data.byIso.get(f.id) || null; f.anchor = this.anchor(f); }
+		const all = topojson.feature(Data.topo, Data.topo.objects.countries).features.filter(f => f.id !== "010" && d3.geoArea(f) > 0);
+		for (const f of all) f.region = Data.byIso.get(f.id) || null;
+		// Only targets are 3D; the other countries are painted flat onto the sphere (paintSurface).
+		const feats = all.filter(f => f.region);
+		for (const f of feats) f.anchor = this.anchor(f);
 		this.feats = feats;
+		this.background = all.filter(f => !f.region);
 		const tot = Data.regions.filter(r => r.meta.iso).map(r => r.total);
 		this.log = d3.scaleLog([Math.max(d3.min(tot), 1), d3.max(tot)], [0, 1]).clamp(true);
 		this.pins = Data.regions.filter(r => r.meta.lat != null).map(r => ({ r, lat: r.meta.lat, lng: r.meta.lon }));
 		this.state = { hover: null, selected: null };
 		this.metric = { kind: "total" };
 		this.drawn = new Promise(res => this.markDrawn = res);
+		this.readColors();
+		this.paintSurface();
 
-		const g = this.g = Globe({ animateIn: !reduceMotion && !lightGlobe })(el)
+		const g = this.g = Globe({ animateIn: !reduceMotion && !lightGlobe, rendererConfig: { alpha: true, antialias: !lightGlobe, powerPreference: "high-performance" } })(el)
 			.backgroundColor("rgba(0,0,0,0)")
+			.globeImageUrl(this.surface.toDataURL())
 			.showGraticules(true)
 			.polygonsData(feats)
 			.onGlobeReady(() => this.whenDrawn())
@@ -458,15 +468,19 @@ const Map3D = {
 			.htmlAltitude(0.02)
 			.htmlElement(p => this.pin(p))
 			.onZoom(pov => el.classList.toggle("labels-on", pov.altitude < 1.9));
-		g.renderer().setPixelRatio(Math.min(devicePixelRatio, 2));
+		g.renderer().setPixelRatio(Math.min(devicePixelRatio, lightGlobe ? 1.5 : 2));
 		g.controls().minDistance = 140;
 		g.controls().maxDistance = 520;
 		g.pointOfView({ lat: 38, lng: 18, altitude: 2.25 }, 0);
 		g.controls().autoRotateSpeed = 0.35;
-		g.controls().autoRotate = !reduceMotion;
+		g.controls().autoRotate = !reduceMotion && !lightGlobe;
 		el.addEventListener("pointerdown", () => this.stopRotate());
+		for (const ev of ["pointermove", "pointerdown", "wheel", "touchstart"]) el.addEventListener(ev, () => this.wake(), { passive: true });
+		new IntersectionObserver(([e]) => { this.visible = e.isIntersecting; this.visible ? this.wake() : this.sleep(); }).observe(el);
+		this.visible = true;
+		this.drawn.then(() => { this.ready = true; this.wake(); });
 		this.theme();
-		new ResizeObserver(() => g.width(el.clientWidth).height(el.clientHeight)).observe(el);
+		new ResizeObserver(() => { g.width(el.clientWidth).height(el.clientHeight); this.wake(); }).observe(el);
 	},
 	// onGlobeReady fires for the bare sphere; the country meshes are built afterwards on the main
 	// thread, so wait until they exist in the scene and one more frame has been painted.
@@ -475,12 +489,46 @@ const Map3D = {
 		const tick = () => has() ? requestAnimationFrame(() => this.markDrawn()) : requestAnimationFrame(tick);
 		tick();
 	},
-	theme() {
+	// Render only while something moves (auto-rotation, a camera move, a transition, the pointer over
+	// the globe); otherwise pause the render loop, and always while the globe is off-screen.
+	wake(ms = 1500) {
+		if (!this.ready) return;   // never pause while the globe is still being built
+		if (this.asleep) { this.g.resumeAnimation(); this.asleep = false; }
+		// Keep the latest deadline, so a short wake (a refresh) doesn't cut a longer one (a drag) short.
+		const at = performance.now() + ms;
+		if (at <= (this.sleepAt || 0) && this.sleepTimer) return;
+		this.sleepAt = at;
+		clearTimeout(this.sleepTimer);
+		this.sleepTimer = setTimeout(() => { this.sleepTimer = null; this.sleep(); }, ms);
+	},
+	sleep() {
+		if (!this.ready) return;
+		clearTimeout(this.sleepTimer); this.sleepTimer = null;
+		if (this.visible && this.g.controls().autoRotate) return this.wake();
+		this.g.pauseAnimation(); this.asleep = true;
+	},
+	readColors() {
 		this.colors = { sea: css("--globe-sea"), land: css("--globe-land"), stroke: css("--globe-stroke"), select: css("--globe-select"), atmo: css("--globe-atmo") };
 		this.colors.dark = d3.hsl(this.colors.sea).l < 0.4;
 		this.seq = d3.interpolateRgbBasis([css("--seq-0"), css("--seq-1"), css("--seq-2")]);
 		this.div = d3.interpolateRgbBasis([css("--div-neg"), css("--div-mid"), css("--div-pos")]);
-		this.g.globeMaterial().color.set(this.colors.sea);
+	},
+	// Sea and non-target countries as one equirectangular texture: one draw call instead of ~170 meshes.
+	paintSurface() {
+		const w = lightGlobe ? 2048 : 4096, h = w / 2;
+		const c = this.surface ||= Object.assign(document.createElement("canvas"), { width: w, height: h });
+		const ctx = c.getContext("2d");
+		const path = d3.geoPath(d3.geoEquirectangular().scale(w / (2 * Math.PI)).translate([w / 2, h / 2]), ctx);
+		ctx.fillStyle = this.colors.sea; ctx.fillRect(0, 0, w, h);
+		ctx.beginPath(); for (const f of this.background) path(f);
+		ctx.fillStyle = this.colors.land; ctx.fill();
+		ctx.lineWidth = w / 4096; ctx.strokeStyle = this.colors.stroke; ctx.stroke();
+	},
+	theme() {
+		this.readColors();
+		const mat = this.g.globeMaterial();
+		mat.color.set("#ffffff");   // the texture carries the sea colour
+		if (mat.map) { this.paintSurface(); mat.map.image = this.surface; mat.map.needsUpdate = true; }
 		this.g.atmosphereColor(this.colors.atmo).atmosphereAltitude(0.16);
 		this.refresh();
 	},
@@ -540,6 +588,7 @@ const Map3D = {
 	refresh() {
 		const g = this.g;
 		g.polygonAltitude(g.polygonAltitude()).polygonCapColor(g.polygonCapColor()).polygonSideColor(g.polygonSideColor()).polygonLabel(g.polygonLabel());
+		this.wake(lightGlobe || reduceMotion ? 500 : 1200);   // long enough for the height transition
 		for (const p of this.pins) if (p.el) {
 			p.el.classList.toggle("is-off", !this.style(p.r));
 			p.el.classList.toggle("is-selected", this.app.current === p.r);
@@ -551,12 +600,12 @@ const Map3D = {
 		this.refresh();
 		if (!r) return;
 		const at = this.state.selected ? this.state.selected.anchor : r.meta.lat != null ? { lat: r.meta.lat, lng: r.meta.lon } : null;
-		if (at) { this.stopRotate(); this.g.pointOfView({ ...at, altitude: 1.55 }, reduceMotion ? 0 : 1200); }
+		if (at) { this.stopRotate(); this.g.pointOfView({ ...at, altitude: 1.55 }, reduceMotion ? 0 : 1200); this.wake(1800); }
 	},
 	stopRotate() {
 		const c = this.g.controls(); c.autoRotate = false;
 		clearTimeout(this.resume);
-		if (!reduceMotion) this.resume = setTimeout(() => { if (!this.app.current && !this.app.playing) c.autoRotate = true; }, 25000);
+		if (!reduceMotion && !lightGlobe) this.resume = setTimeout(() => { if (!this.app.current && !this.app.playing) { c.autoRotate = true; this.wake(); } }, 25000);
 	},
 };
 
@@ -578,7 +627,7 @@ const App = {
 		this.watchTheme();
 		addEventListener("hashchange", () => this.route());
 		this.route();
-		Promise.all([Map3D.drawn, this.loadAll()]).then(() => { document.body.dataset.state = "ready"; });
+		Promise.all([Map3D.drawn, this.loadAll()]).then(() => { document.body.dataset.state = "ready"; window.showWelcome?.(); });
 		let t, lastW = document.body.clientWidth;
 		new ResizeObserver(() => {
 			const w = document.body.clientWidth;
@@ -799,7 +848,7 @@ const App = {
 		Charts.timeline($("#r-timeline"), d.articlesPerDay, { surges });
 		Charts.bars($("#r-sources"), d.topSources.slice(0, 12), {
 			label: s => esc(sourceLabel(s.source)), value: s => s.count, total: d.totalArticles,
-			chip: s => sourceChip(s.source) + (Data.infoDefense.has(s.source) ? `<span class="chip chip-id" title="Listed in the InfoDefense dataset">InfoDefense</span>` : ""),
+			chip: s => sourceChip(s.source) + (isTelegram(s.source) && Data.infoDefense.has(sourceLabel(s.source).toLowerCase()) ? `<span class="chip chip-id" title="Listed in the InfoDefense dataset">InfoDefense</span>` : ""),
 		});
 		if (hist) { this.turnover(hist); this.categoryMix(hist); }
 		Charts.bars($("#r-cats"), d.categories, { label: c => esc(c.category), value: c => c.count, total: d.totalArticles });
@@ -849,7 +898,7 @@ const App = {
 		// Collected vs published that month: a large gap means CheckFirst was still loading older articles.
 		for (const x of rows) x.backfill = x.pub ? Math.abs(x.total / x.pub - 1) > 0.2 : true;
 		el.innerHTML = `<ol class="turnover">${rows.map(x => `
-			<li><span class="to-m">${monthLabel(x.m)}${Data.history.partialLast && x.m === months.at(-1) ? " <small>to date</small>" : ""}<small>${compact.format(x.total)} collected</small>${x.backfill ? `<small class="warn" title="Collected ${full.format(x.total)} articles but only ${full.format(x.pub)} are dated to this month: the month includes older, back-loaded articles.">Includes older articles</small>` : ""}</span>
+			<li><span class="to-m">${monthLabel(x.m)}${Data.history.partialLast && x.m === months.at(-1) ? " <small>to date</small>" : ""}<small>${compact.format(x.total)} collected</small></span>
 			<ol class="to-src">${x.sources.slice(0, 5).map(([s, c]) => `<li><span class="to-name">${esc(sourceLabel(s))}${isTelegram(s) ? `<span class="chip chip-tg">TG</span>` : isMax(s) ? `<span class="chip chip-max">MAX</span>` : ""}${x.fresh.has(s) ? `<span class="chip chip-new">New</span>` : ""}</span><span class="to-share">${pct(c / x.total)}</span></li>`).join("")}</ol></li>`).join("")}</ol>`;
 	},
 
