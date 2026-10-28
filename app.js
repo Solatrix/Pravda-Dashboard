@@ -467,7 +467,8 @@ const Map3D = {
 			.htmlElementsData(this.pins)
 			.htmlAltitude(0.02)
 			.htmlElement(p => this.pin(p))
-			.onZoom(pov => el.classList.toggle("labels-on", pov.altitude < 1.9));
+			.htmlElementVisibilityModifier((a, front) => { a.style.visibility = front ? "" : "hidden"; const p = this.pins.find(x => x.anchor === a); if (p) p.front = front; })
+			.onZoom(() => this.layoutSoon());
 		g.renderer().setPixelRatio(Math.min(devicePixelRatio, lightGlobe ? 1.5 : 2));
 		g.controls().minDistance = 140;
 		g.controls().maxDistance = 520;
@@ -478,9 +479,10 @@ const Map3D = {
 		for (const ev of ["pointermove", "pointerdown", "wheel", "touchstart"]) el.addEventListener(ev, () => this.wake(), { passive: true });
 		new IntersectionObserver(([e]) => { this.visible = e.isIntersecting; this.visible ? this.wake() : this.sleep(); }).observe(el);
 		this.visible = true;
-		this.drawn.then(() => { this.ready = true; this.wake(); });
+		this.drawn.then(() => { this.ready = true; this.wake(); this.layoutSoon(); });
+		document.fonts?.ready.then(() => this.layoutSoon());   // label widths change once the web font arrives
 		this.theme();
-		new ResizeObserver(() => { g.width(el.clientWidth).height(el.clientHeight); this.wake(); }).observe(el);
+		new ResizeObserver(() => { g.width(el.clientWidth).height(el.clientHeight); this.wake(); this.layoutSoon(); }).observe(el);
 	},
 	// onGlobeReady fires for the bare sphere; the country meshes are built afterwards on the main
 	// thread, so wait until they exist in the scene and one more frame has been painted.
@@ -575,15 +577,50 @@ const Map3D = {
 		return `<div class="globe-tip"><b>${esc(r.label)}</b><span>${line}</span></div>`;
 	},
 	pin(p) {
+		const a = document.createElement("div");
+		a.className = "pin-anchor";
 		const b = document.createElement("button");
-		b.className = `pin pin-${p.r.type}${p.r.meta.side === "left" ? " pin-left" : ""}`;
+		b.className = `pin pin-${p.r.type}`;
 		b.type = "button";
 		b.innerHTML = `<i></i><span>${esc(p.r.label)}</span>`;
 		b.setAttribute("aria-label", `${p.r.label}: ${full.format(p.r.total)} articles`);
 		b.style.pointerEvents = "auto";
 		b.addEventListener("click", () => this.app.select(p.r));
-		p.el = b;
-		return b;
+		a.append(b);
+		p.el = b; p.anchor = a;
+		return a;
+	},
+	// Each label goes right, left, above or below its dot, whichever side is free of other labels, dots and
+	// the edges (selected pin first, then larger targets); with no free side it hides until hovered.
+	// Dots that land on the same spot (EU and NATO in Brussels) are stacked a few pixels apart.
+	placeLabels() {
+		// Read the camera here rather than only in onZoom, which camera moves made in code don't always trigger.
+		const labelsOn = this.g.pointOfView().altitude < 1.9, W = this.el.clientWidth, H = this.el.clientHeight;
+		this.el.classList.toggle("labels-on", labelsOn);
+		const pins = this.pins.filter(p => p.el && p.front !== false).map(p => ({ p, ...this.g.getScreenCoords(p.lat, p.lng, 0.02), dy: 0 }));
+		pins.sort((a, b) => a.y - b.y);
+		pins.forEach((q, i) => { while (pins.slice(0, i).some(o => Math.hypot(o.x - q.x, o.y + o.dy - q.y - q.dy) < 12)) q.dy += 13; });
+		const box = (x, y, w, h) => ({ x0: x, y0: y, x1: x + w, y1: y + h });
+		const hit = (a, b) => a.x0 < b.x1 + 2 && b.x0 < a.x1 + 2 && a.y0 < b.y1 + 2 && b.y0 < a.y1 + 2;
+		const taken = pins.map(q => box(q.x - 6.5, q.y + q.dy - 6.5, 13, 13));
+		const weight = q => q.p.r === this.app.current ? Infinity : q.p.r.total;
+		for (const q of pins.sort((a, b) => weight(b) - weight(a))) {
+			const s = q.p.el.lastElementChild, w = s.offsetWidth, h = s.offsetHeight, x = q.x, y = q.y + q.dy, gap = 9.5;
+			const sides = q.p.r.meta.side === "left" ? ["left", "right", "top", "bottom"] : ["right", "left", "top", "bottom"];
+			const at = { right: box(x + gap, y - h / 2, w, h), left: box(x - gap - w, y - h / 2, w, h), top: box(x - w / 2, y - gap - h, w, h), bottom: box(x - w / 2, y + gap, w, h) };
+			let place = sides[0];   // labels hidden at this zoom only appear on hover, on their preferred side
+			if (labelsOn || q.p.r === this.app.current) {
+				place = sides.find(k => { const r = at[k]; return r.x0 >= 0 && r.y0 >= 0 && r.x1 <= W && r.y1 <= H && !taken.some(t => hit(r, t)); }) || "none";
+				if (place !== "none") taken.push(at[place]);
+			}
+			if (q.p.el.dataset.place !== place) q.p.el.dataset.place = place;
+			q.p.el.style.setProperty("--dy", `${q.dy}px`);
+		}
+	},
+	layoutSoon() {
+		if (this.layoutQueued) return;
+		this.layoutQueued = true;
+		requestAnimationFrame(() => { this.layoutQueued = false; this.placeLabels(); });
 	},
 	refresh() {
 		const g = this.g;
@@ -593,6 +630,7 @@ const Map3D = {
 			p.el.classList.toggle("is-off", !this.style(p.r));
 			p.el.classList.toggle("is-selected", this.app.current === p.r);
 		}
+		this.layoutSoon();
 	},
 	setMetric(m) { this.metric = m; this.refresh(); },
 	focus(r) {
@@ -600,7 +638,7 @@ const Map3D = {
 		this.refresh();
 		if (!r) return;
 		const at = this.state.selected ? this.state.selected.anchor : r.meta.lat != null ? { lat: r.meta.lat, lng: r.meta.lon } : null;
-		if (at) { this.stopRotate(); this.g.pointOfView({ ...at, altitude: 1.55 }, reduceMotion ? 0 : 1200); this.wake(1800); }
+		if (at) { this.stopRotate(); this.g.pointOfView({ ...at, altitude: 1.55 }, reduceMotion ? 0 : 1200); this.wake(1800); setTimeout(() => this.layoutSoon(), reduceMotion ? 0 : 1250); }
 	},
 	stopRotate() {
 		const c = this.g.controls(); c.autoRotate = false;

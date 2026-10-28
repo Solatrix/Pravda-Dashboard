@@ -34,14 +34,21 @@ body[data-state="error"] .ld-bar i { background: var(--up); }
 .globe-tip .muted { color: var(--tip-muted); }
 
 /* globe pins */
-.pin { display: flex; align-items: center; gap: 5px; border: 0; background: none; padding: 2px; cursor: pointer; transform: translate(-6px, -50%); white-space: nowrap; }
-.pin i { width: 9px; height: 9px; border-radius: 50%; background: var(--pin); box-shadow: 0 0 0 2px var(--bg); flex: none; }
-.pin-left { flex-direction: row-reverse; transform: translate(calc(-100% + 6px), -50%); }
+/* globe.gl positions the zero-size anchor (and overwrites its transform); the dot is centred on it, shifted by
+   --dy when pins share a spot, and placeLabels() puts the label on the free side through data-place. */
+.pin-anchor { width: 0; height: 0; }
+.pin { position: absolute; left: 0; top: 0; width: 13px; height: 13px; padding: 0; border: 0; background: none; cursor: pointer; transform: translate(-50%, calc(-50% + var(--dy, 0px))); }
+.pin i { position: absolute; left: 2px; top: 2px; width: 9px; height: 9px; border-radius: 50%; background: var(--pin); box-shadow: 0 0 0 2px var(--bg); }
 .pin-supranational i { border-radius: 2px; transform: rotate(45deg); }
-.pin span { font: 600 10.5px/1 var(--f-body); color: var(--ink); background: color-mix(in srgb, var(--bg) 78%, transparent); padding: 3px 5px; border-radius: 3px; opacity: .9; }
-.pin:hover span, .pin.is-selected span { background: var(--accent); color: var(--accent-ink); opacity: 1; }
+.pin span { position: absolute; top: 50%; left: calc(100% + 3px); transform: translateY(-50%); white-space: nowrap; font: 600 10.5px/1 var(--f-body); color: var(--ink); background: color-mix(in srgb, var(--bg) 78%, transparent); padding: 3px 5px; border-radius: 3px; opacity: .9; }
+.pin[data-place="left"] span { left: auto; right: calc(100% + 3px); }
+.pin[data-place="top"] span { left: 50%; top: auto; bottom: calc(100% + 3px); transform: translateX(-50%); }
+.pin[data-place="bottom"] span { left: 50%; top: calc(100% + 3px); transform: translateX(-50%); }
+.pin:hover span, .pin.is-selected span { background: var(--accent); color: var(--accent-ink); opacity: 1; z-index: 1; }
 .pin.is-off { opacity: .2; }
-#globe:not(.labels-on) .pin:not(:hover):not(:focus-visible):not(.is-selected) span { display: none; }
+/* Hidden labels keep their size (visibility, not display) so placeLabels() can measure them. */
+#globe:not(.labels-on) .pin:not(:hover):not(:focus-visible):not(.is-selected) span,
+.pin[data-place="none"]:not(:hover):not(:focus-visible):not(.is-selected) span { visibility: hidden; }
 
 /* legend */
 .legend-t { margin: 0 0 6px; font-size: 12px; }
