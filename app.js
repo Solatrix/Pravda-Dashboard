@@ -323,6 +323,23 @@ const tipOn = (el, html) => {
 	el.addEventListener("pointerleave", () => Tip.hide());
 };
 
+// A small info button after a heading: a mouse hovering it, keyboard focus, or a tap shows a short note.
+// A click or tap pins the note open; Esc or a press elsewhere closes it. Wired once per button.
+const infoTip = (btn, pop) => {
+	if (btn.dataset.wired) return;
+	btn.dataset.wired = "1";
+	let pinned = false;
+	const set = on => { pop.hidden = !on; btn.setAttribute("aria-expanded", on); };
+	btn.addEventListener("pointerenter", e => { if (e.pointerType === "mouse") set(true); });
+	btn.addEventListener("pointerleave", () => { if (!pinned) set(false); });
+	btn.addEventListener("focus", () => { if (btn.matches(":focus-visible")) set(true); });
+	btn.addEventListener("blur", () => { if (!pinned) set(false); });
+	btn.addEventListener("click", () => { pinned = !pinned; set(pinned); });
+	const close = () => { pinned = false; set(false); };
+	document.addEventListener("pointerdown", e => { if (pinned && !btn.contains(e.target) && !pop.contains(e.target)) close(); });
+	document.addEventListener("keydown", e => { if (e.key === "Escape" && !pop.hidden) { close(); btn.focus(); } });
+};
+
 /* ---------- charts ---------- */
 const Charts = {
 	width(el) { return Math.max(260, el.clientWidth || el.parentElement.clientWidth || 320); },
@@ -837,7 +854,11 @@ const App = {
 			<div class="kpi"><span class="kpi-v">${d.firstDay ? fmtMonth(parseDate(d.firstDay)) : "—"}</span><span class="kpi-l">First article in feed</span></div>
 		</section>
 		<section class="sec">
-			<h3 class="sec-h">Latest articles</h3>
+			<div class="sec-head">
+				<h3 class="sec-h">Latest articles</h3>
+				<button type="button" class="info" id="r-latest-info" aria-label="About these articles" aria-expanded="false" aria-controls="r-latest-pop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v6"/><circle cx="12" cy="7.5" r=".6" fill="currentColor"/></svg></button>
+				<p class="info-pop" id="r-latest-pop" role="tooltip" hidden></p>
+			</div>
 			<div id="r-latest"></div>
 		</section>
 		<section class="sec">
@@ -918,12 +939,14 @@ const App = {
 		const items = (Data.headlines?.domains ? r.domains.flatMap(x => (Data.headlines.domains[x] || []).map(a => ({ ...a, domain: x }))) : [])
 			.sort((a, b) => (b.published || "").localeCompare(a.published || "")).slice(0, 8);
 		const archive = u => `https://web.archive.org/web/${u}`;
+		const pop = $("#r-latest-pop");
+		infoTip($("#r-latest-info"), pop);
 		if (items.length) {
-			el.innerHTML = `<ol class="latest">${items.map(a => `<li><a href="${esc(a.archive || archive(a.url))}" target="_blank" rel="noopener noreferrer nofollow">${esc(a.title)}</a><span class="muted">${esc(a.domain)}${a.published ? ` · ${fmtDate(new Date(a.published))}` : ""}</span></li>`).join("")}</ol>
-				<p class="note">Collected ${fmtDate(new Date(Data.headlines.generated))} by a server-side job. Links open archived copies, so your visit never reaches the network's sites.</p>`;
+			pop.textContent = `Collected ${fmtDate(new Date(Data.headlines.generated))}. Links open archived copies, so your visit never reaches the network's sites.`;
+			el.innerHTML = `<ol class="latest">${items.map(a => `<li><a href="${esc(a.archive || archive(a.url))}" target="_blank" rel="noopener noreferrer nofollow">${esc(a.title)}</a><span class="muted">${esc(a.domain)}${a.published ? ` · ${fmtDate(new Date(a.published))}` : ""}</span></li>`).join("")}</ol>`;
 		} else {
-			el.innerHTML = `<p class="sec-sub">Headlines appear here once the nightly collection job has run. Until then, these open the most recent archived copy of each site, so your visit never reaches the network's servers.</p>
-				<ul class="archive-links">${d.files.map(x => `<li><a href="${archive("https://" + x + "/")}" target="_blank" rel="noopener noreferrer nofollow">${esc(x)}</a><span class="muted">Wayback Machine</span></li>`).join("")}</ul>`;
+			pop.textContent = "Headlines appear here once the nightly collection job has run. Until then, these open the most recent archived copy of each site, so your visit never reaches the network's servers.";
+			el.innerHTML = `<ul class="archive-links">${d.files.map(x => `<li><a href="${archive("https://" + x + "/")}" target="_blank" rel="noopener noreferrer nofollow">${esc(x)}</a><span class="muted">Wayback Machine</span></li>`).join("")}</ul>`;
 		}
 	},
 

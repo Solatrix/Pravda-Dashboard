@@ -4,6 +4,12 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<!-- Privacy-friendly analytics by Plausible -->
+	<script async src="https://plausible.io/js/pa-k2cMnLGxAW3Sx6d5qeG2g.js"></script>
+	<script>
+		window.plausible = window.plausible || function () { (plausible.q = plausible.q || []).push(arguments) }, plausible.init = plausible.init || function (i) { plausible.o = i || {} };
+		plausible.init()
+	</script>
 	<title>Pravda Dashboard - Network history</title>
 	<style>
 		body{
@@ -41,7 +47,7 @@
 			}
 		}
 	</style>
-	<link rel="stylesheet" href="../css/general.css">
+	<link rel="stylesheet" href="../legacy/css/general.css">
 </head>
 
 <body>
@@ -55,9 +61,9 @@
 	<script src="https://unpkg.com/d3@5.7.0/dist/d3.min.js"></script>
 
 	<script type="module">
-		import { renderScatterChart } from "../js/graphCollection.js"
+		import { renderScatterChart } from "../legacy/js/graphCollection.js"
 		(async () => {
-			const data = (await (await fetch("../res/json/domainActiveSince.json")).json())
+			const data = (await (await fetch("../legacy/res/json/domainActiveSince.json")).json())
 			renderScatterChart("scatter-chart", data)
 		})()
 

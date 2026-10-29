@@ -85,6 +85,11 @@ body[data-state="error"] .ld-bar i { background: var(--up); }
 /* sections */
 .sec { display: grid; gap: 8px; min-width: 0; }
 .sec-h { font: 600 var(--h3-size, 15px)/1.25 var(--f-display); }
+.sec-head { position: relative; display: flex; align-items: center; gap: 6px; }
+.info { flex: none; display: grid; place-items: center; width: 22px; height: 22px; margin: -2px 0; padding: 0; border: 0; border-radius: 50%; background: none; color: var(--ink-2); cursor: pointer; }
+.info:hover, .info[aria-expanded="true"] { color: var(--ink); }
+.info svg { width: 16px; height: 16px; }
+.info-pop { position: absolute; z-index: 5; top: calc(100% + 4px); left: 0; margin: 0; width: min(100%, 340px); padding: 8px 10px; border-radius: var(--r-sm); background: var(--tip-bg); color: var(--tip-ink); font-size: 12px; line-height: 1.45; box-shadow: 0 8px 24px rgb(0 0 0 / .18); }
 .sec-sub { margin: 0; color: var(--ink-2); font-size: 12.5px; max-width: 62ch; }
 .sec-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
 .chart { min-width: 0; }
