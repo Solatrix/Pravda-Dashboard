@@ -41,6 +41,10 @@ const isMax = s => s.startsWith("MAX") || s.includes("max.ru");
 const sourceLabel = s => isTelegram(s) ? s.replace(TELEGRAM, "") : s.startsWith("MAX") ? s.replace(/^MAX:?\s*/, "") : s;
 const sourceChip = s => isTelegram(s) ? `<span class="chip chip-tg">Telegram</span>` : isMax(s) ? `<span class="chip chip-max">MAX</span>` : `<span class="chip chip-web">Web</span>`;
 
+// Plausible custom events. Props are short labels from fixed lists (target, type, metric, month...);
+// nothing the visitor types is ever sent. Safe when the tracker is blocked or still loading.
+const track = (name, props) => { try { window.plausible?.(name, props ? { props } : undefined); } catch { /* blocked */ } };
+
 function mergeCounts(lists, key, val = "count") {
 	const m = new Map();
 	for (const list of lists) for (const e of list || []) m.set(e[key], (m.get(e[key]) || 0) + e[val]);
@@ -480,7 +484,7 @@ const Map3D = {
 			.polygonStrokeColor(() => this.colors.stroke)
 			.polygonLabel(f => f.region ? this.label(f.region) : "")
 			.onPolygonHover(f => { this.state.hover = f && f.region ? f : null; el.style.cursor = this.state.hover ? "pointer" : "grab"; this.refresh(); })
-			.onPolygonClick(f => { if (f.region) app.select(f.region); })
+			.onPolygonClick(f => { if (f.region) app.pick(f.region, "globe"); })
 			.htmlElementsData(this.pins)
 			.htmlAltitude(0.02)
 			.htmlElement(p => this.pin(p))
@@ -602,7 +606,7 @@ const Map3D = {
 		b.innerHTML = `<i></i><span>${esc(p.r.label)}</span>`;
 		b.setAttribute("aria-label", `${p.r.label}: ${full.format(p.r.total)} articles`);
 		b.style.pointerEvents = "auto";
-		b.addEventListener("click", () => this.app.select(p.r));
+		b.addEventListener("click", () => this.app.pick(p.r, "pin"));
 		a.append(b);
 		p.el = b; p.anchor = a;
 		return a;
@@ -681,7 +685,12 @@ const App = {
 		this.kpis(); this.legend(); this.search(); this.ranking(); this.rhythm(); this.networkHistory();
 		this.watchTheme();
 		addEventListener("hashchange", () => this.route());
-		this.route();
+		// Plain #target links inside the panel (twins, momentum, ...): note which list they came from.
+		$("#panel").addEventListener("click", e => {
+			const a = e.target.closest('a[href^="#"]');
+			if (a && a.hash !== location.hash) this.via = a.closest(".twins") ? "twins" : a.closest("#rising") ? "momentum" : "link";
+		});
+		this.via = "url"; this.route(); this.via = null;
 		Promise.all([Map3D.drawn, this.loadAll()]).then(() => { document.body.dataset.state = "ready"; window.showWelcome?.(); });
 		let t, lastW = document.body.clientWidth;
 		new ResizeObserver(() => {
@@ -745,8 +754,14 @@ const App = {
 			const kind = sel.value, month = months[+range.value];
 			this.setView(kind, month);
 		};
-		sel.addEventListener("change", apply);
-		range.addEventListener("input", () => { stop(); apply(); });
+		let scrubbed;
+		sel.addEventListener("change", () => { track("Colour by changed", { metric: sel.value }); apply(); });
+		// One event per scrub: sent once the slider has rested for a moment.
+		range.addEventListener("input", () => {
+			stop(); apply();
+			clearTimeout(scrubbed);
+			scrubbed = setTimeout(() => track("Month scrubbed", { month: months[+range.value], metric: sel.value }), 800);
+		});
 		let timer = null;
 		const icons = {
 			play: `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>`,
@@ -760,8 +775,9 @@ const App = {
 		const stop = () => { clearInterval(timer); timer = null; this.playing = false; showPlay(false); };
 		// Plays once to the last month, holds it for one step, then rewinds to the first month and stops.
 		play.addEventListener("click", () => {
-			if (timer) return stop();
+			if (timer) { track("Month playback", { action: "pause", metric: sel.value }); return stop(); }
 			if (sel.value === "total") sel.value = "rank";
+			track("Month playback", { action: "play", metric: sel.value });
 			let i = +range.value >= months.length - 1 ? 0 : +range.value;
 			this.playing = true; showPlay(true); Map3D.stopRotate();
 			timer = setInterval(() => {
@@ -805,8 +821,12 @@ const App = {
 	/* ----- routing ----- */
 	route() {
 		const r = Data.bySlug.get(location.hash.slice(1)) || null;
+		if (r && r !== this.current) track("Target selected", { target: r.label, type: r.type, via: this.via || "history" });
+		this.via = null;
 		if (r !== this.current) this.show(r);
 	},
+	// Opens a target and remembers where the click came from, for route() to report.
+	pick(r, via) { if (r !== this.current) this.via = via; this.select(r); },
 	select(r) {
 		if (r) { location.hash = r.slug; return; }
 		history.replaceState(null, "", location.pathname + location.search);
@@ -923,7 +943,7 @@ const App = {
 		const el = $("#r-months"); if (!el || !r.data) return;
 		const months = (Data.months || [...r.data.monthly.keys()].sort()).filter(m => m >= r.data.firstDay?.slice(0, 7)).slice(-30);
 		const rankOf = m => Data.monthStats?.get(m)?.stats.get(r)?.rank;
-		Charts.months(el, months, m => r.data.monthly.get(m) || 0, { selected: this.view.kind === "total" ? null : this.view.month, rankOf, onPick: m => this.pickMonth(m) });
+		Charts.months(el, months, m => r.data.monthly.get(m) || 0, { selected: this.view.kind === "total" ? null : this.view.month, rankOf, onPick: m => { track("Month bar clicked", { target: r.label, month: m }); this.pickMonth(m); } });
 		const line = $("#r-rankline");
 		if (line && Data.monthStats) {
 			const last = months.filter(m => m !== Data.partialMonth).slice(-12).map(m => ({ m, rank: rankOf(m) })).filter(x => x.rank);
@@ -1029,7 +1049,7 @@ const App = {
 			input.setAttribute("aria-expanded", String(!!items.length));
 			if (active >= 0) input.setAttribute("aria-activedescendant", `opt-${active}`); else input.removeAttribute("aria-activedescendant");
 		};
-		const choose = r => { input.value = ""; items = []; active = -1; render(); input.blur(); this.select(r); };
+		const choose = r => { input.value = ""; items = []; active = -1; render(); input.blur(); this.pick(r, "search"); };
 		input.addEventListener("input", () => {
 			const q = fold(input.value.trim());
 			items = q ? Data.regions.filter(r => fold(r.label).includes(q) || fold(r.name).includes(q) || r.domains.some(d => d.includes(q)))
@@ -1053,7 +1073,7 @@ const App = {
 			const types = ["all", ...new Set(Data.regions.map(r => r.type))];
 			el.innerHTML = `<div class="filters" role="group" aria-label="Filter targets">${types.map(t => `<button type="button" class="filter" data-t="${t}" aria-pressed="${t === "all"}">${t === "all" ? "All" : esc(TYPE_LABEL[t])}</button>`).join("")}</div><div id="ranking-list" class="ranking-list"></div>`;
 			el.querySelectorAll(".filter").forEach(b => b.addEventListener("click", () => {
-				this.rankFilter = b.dataset.t; el.querySelectorAll(".filter").forEach(x => x.setAttribute("aria-pressed", String(x === b))); this.ranking();
+				this.rankFilter = b.dataset.t; track("Ranking filter", { type: b.dataset.t }); el.querySelectorAll(".filter").forEach(x => x.setAttribute("aria-pressed", String(x === b))); this.ranking();
 			}));
 			el.dataset.built = "1";
 		}
@@ -1068,7 +1088,7 @@ const App = {
 			label: x => `<span class="rank">${x.rank}</span>${esc(x.r.label)}`, value: x => x.v,
 			chip: x => x.r.type !== "country" ? `<span class="chip chip-type">${esc(TYPE_LABEL[x.r.type])}</span>` : "",
 			after: x => x.rankDelta ? `<span class="mv mv-${x.rankDelta > 0 ? "up" : "down"}" title="${x.rankDelta > 0 ? "Up" : "Down"} ${Math.abs(x.rankDelta)} from previous month">${x.rankDelta > 0 ? "▲" : "▼"}${Math.abs(x.rankDelta)}</span>` : "",
-			onClick: x => this.select(x.r),
+			onClick: x => this.pick(x.r, "ranking"),
 		});
 	},
 
@@ -1112,5 +1132,5 @@ const App = {
 	},
 };
 
-window.PravdaAtlas = { start: cfg => App.start(cfg), Data, globe: () => Map3D.g };
+window.PravdaAtlas = { start: cfg => App.start(cfg), Data, globe: () => Map3D.g, track };
 })();

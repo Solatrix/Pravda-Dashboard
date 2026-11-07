@@ -6,7 +6,7 @@
 	<script async src="https://plausible.io/js/pa-k2cMnLGxAW3Sx6d5qeG2g.js"></script>
 	<script>
 		window.plausible = window.plausible || function () { (plausible.q = plausible.q || []).push(arguments) }, plausible.init = plausible.init || function (i) { plausible.o = i || {} };
-		plausible.init()
+		plausible.init({ hashBasedRouting: true })   // each #target counts as a page
 	</script>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -865,8 +865,7 @@
 					</section>
 				</div>
 				<p class="note">Data: CheckFirst, Pravda Network Data Collection (snapshot), and its git history for
-					month-by-month sources. Map shapes: Natural Earth via world-atlas. By Valentin Châtelet. <a
-						href="./legacy/">Legacy dashboard</a></p>
+					month-by-month sources. Map shapes: Natural Earth via world-atlas. By Valentin Châtelet. <a href="./legacy/" data-from="footer">Legacy dashboard</a></p>
 			</div>
 		</aside>
 	</main>
@@ -874,7 +873,7 @@
 
 	<dialog id="welcome" class="welcome" aria-labelledby="welcome-title">
 		<form method="dialog">
-			<button class="welcome-x" value="close" aria-label="Close">×</button>
+			<button class="welcome-x" value="x" aria-label="Close">×</button>
 			<h2 id="welcome-title">Welcome to the Pravda Network Atlas</h2>
 			<p>This is the new version of the Pravda Dashboard.</p>
 			<ul>
@@ -884,14 +883,22 @@
 			</ul>
 			<p>The previous dashboard is still available.</p>
 			<div class="welcome-actions">
-				<a class="welcome-alt" href="./legacy/">Open legacy dashboard</a>
-				<button class="welcome-go" value="close" autofocus>Explore the Atlas</button>
+				<a class="welcome-alt" href="./legacy/" data-from="welcome">Open legacy dashboard</a>
+				<button class="welcome-go" value="explore" autofocus>Explore the Atlas</button>
 			</div>
 		</form>
 	</dialog>
 	<script>
 		// Shown on every visit until the end of the transition period, once the globe has been drawn (app.js calls it).
-		window.showWelcome = () => { const w = document.getElementById("welcome"); if (new Date() < new Date("2027-02-01T00:00:00Z") && w.showModal) w.showModal(); };
+		window.showWelcome = () => {
+			const w = document.getElementById("welcome");
+			if (new Date() >= new Date("2027-02-01T00:00:00Z") || !w.showModal) return;
+			w.showModal();
+			PravdaAtlas.track("Welcome shown");
+		};
+		// How the dialog was dismissed (the buttons set returnValue; Esc leaves it empty), and clicks on the legacy links.
+		document.getElementById("welcome").addEventListener("close", e => PravdaAtlas.track("Welcome dismissed", { how: e.target.returnValue || "escape" }));
+		document.addEventListener("click", e => { const a = e.target.closest("a[data-from]"); if (a) PravdaAtlas.track("Legacy dashboard click", { from: a.dataset.from }); });
 	</script>
 
 	<script>
