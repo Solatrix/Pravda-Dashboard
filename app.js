@@ -958,15 +958,14 @@ const App = {
 		const el = $("#r-latest");
 		const items = (Data.headlines?.domains ? r.domains.flatMap(x => (Data.headlines.domains[x] || []).map(a => ({ ...a, domain: x }))) : [])
 			.sort((a, b) => (b.published || "").localeCompare(a.published || "")).slice(0, 8);
-		const archive = u => `https://web.archive.org/web/${u}`;
 		const pop = $("#r-latest-pop");
 		infoTip($("#r-latest-info"), pop);
 		if (items.length) {
-			pop.textContent = `Collected ${fmtDate(new Date(Data.headlines.generated))}. Links open archived copies, so your visit never reaches the network's sites.`;
-			el.innerHTML = `<ol class="latest">${items.map(a => `<li><a href="${esc(a.archive || archive(a.url))}" target="_blank" rel="noopener noreferrer nofollow">${esc(a.title)}</a><span class="muted">${esc(a.domain)}${a.published ? ` · ${fmtDate(new Date(a.published))}` : ""}</span></li>`).join("")}</ol>`;
+			pop.textContent = `Collected ${fmtDate(new Date(Data.headlines.generated))}. Links open urlscan.io scans of the articles, so your visit never reaches the network's sites.`;
+			el.innerHTML = `<ol class="latest">${items.map(a => `<li>${a.scan ? `<a href="${esc(a.scan)}" target="_blank" rel="noopener noreferrer nofollow">${esc(a.title)}</a>` : `<span>${esc(a.title)}</span>`}<span class="muted">${esc(a.domain)}${a.published ? ` · ${fmtDate(new Date(a.published))}` : ""}</span></li>`).join("")}</ol>`;
 		} else {
-			pop.textContent = "Headlines appear here once the nightly collection job has run. Until then, these open the most recent archived copy of each site, so your visit never reaches the network's servers.";
-			el.innerHTML = `<ul class="archive-links">${d.files.map(x => `<li><a href="${archive("https://" + x + "/")}" target="_blank" rel="noopener noreferrer nofollow">${esc(x)}</a><span class="muted">Wayback Machine</span></li>`).join("")}</ul>`;
+			pop.textContent = "Headlines are collected nightly from each site's feed. Links open urlscan.io scans of the articles, so your visit never reaches the network's sites.";
+			el.innerHTML = `<p class="sec-sub">No headlines collected for this target yet.</p>`;
 		}
 	},
 

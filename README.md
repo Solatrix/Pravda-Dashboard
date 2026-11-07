@@ -11,7 +11,7 @@ All figures come from CheckFirst's near real-time [Pravda Network Data Collectio
 - `res/json/pravda-all-domains.json`: which domains serve which target
 - `res/json/summary.json`: per-target monthly totals, recent days and twins (built twice daily)
 - `res/json/history.json`: month-by-month sources and categories from CheckFirst's git history (built weekly)
-- `res/json/headlines.json`: latest headlines with Wayback Machine links (built nightly)
+- `res/json/headlines.json`: latest headlines, each linked to a public urlscan.io scan (built nightly)
 
 The site is static (GitHub Pages). The JSON files are built by GitHub Actions in `.github/workflows/`, using the scripts in `tools/`, so visitors' browsers never contact the network's sites.
 

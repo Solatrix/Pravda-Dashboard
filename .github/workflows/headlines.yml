@@ -25,7 +25,9 @@ jobs:
         if: inputs.probe
         run: python tools/fetch_headlines.py res/json/pravda-all-domains.json --probe 4
       - if: ${{ !inputs.probe }}
-        run: python tools/fetch_headlines.py res/json/pravda-all-domains.json res/json/headlines.json --per-domain 10 --archive
+        env:
+          URLSCAN_API_KEY: ${{ secrets.URLSCAN_API_KEY }}
+        run: python tools/fetch_headlines.py res/json/pravda-all-domains.json res/json/headlines.json --per-domain 10 --scan
       - name: Commit if changed
         if: ${{ !inputs.probe }}
         run: |
