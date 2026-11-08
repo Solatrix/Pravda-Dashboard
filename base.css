@@ -30,6 +30,7 @@ body[data-state="error"] .ld-bar i { background: var(--up); }
 #tooltip .muted { color: var(--tip-muted); }
 .float-tooltip-kap { background: none !important; padding: 0 !important; }
 .globe-tip { display: grid; gap: 1px; background: var(--tip-bg); color: var(--tip-ink); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 7px 10px; font: 12px/1.4 var(--f-body); box-shadow: 0 8px 24px rgb(0 0 0 / .18); font-variant-numeric: tabular-nums; }
+#globe .float-tooltip-kap { z-index: 100; }
 .globe-tip b { font-family: var(--f-display); font-size: 14px; }
 .globe-tip .muted { color: var(--tip-muted); }
 
